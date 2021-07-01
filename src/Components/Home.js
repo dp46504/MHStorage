@@ -21,6 +21,7 @@ function Home(props) {
         style={{ height: 240, width: 320 }}
         onError={handleError}
         onScan={handleScan}
+        facingMode="rear"
       />
       <p>{result}</p>
     </div>
