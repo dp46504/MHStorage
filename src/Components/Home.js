@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import QrReader from "react-weblineindia-qrcode-scanner";
 
 function Home(props) {
+  //eslint-disable-next-line
   let [delay, setDelay] = useState(100);
   let [result, setResult] = useState("Not result");
 
