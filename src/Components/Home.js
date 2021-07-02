@@ -18,7 +18,7 @@ function Home(props) {
     <div>
       <QrReader
         delay={delay}
-        style={{ height: 240, width: 320 }}
+        style={{ height: 700, width: 1920 }}
         onError={handleError}
         onScan={handleScan}
         facingMode="rear"
