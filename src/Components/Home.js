@@ -1,30 +1,23 @@
-import React, { useState } from "react";
-import QrReader from "react-weblineindia-qrcode-scanner";
+// Frameworks imports
+import React, { useContext } from "react";
+
+// Helpers
+import UserContext from "../UserContext";
+
+// Components
+// eslint-disable-next-line
+import Reader from "./Reader";
+import { Container } from "../Styles/Styles";
 
 function Home(props) {
-  //eslint-disable-next-line
-  let [delay, setDelay] = useState(100);
-  let [result, setResult] = useState("Not result");
-
-  let handleScan = (data) => {
-    setResult(data);
-  };
-
-  let handleError = (err) => {
-    alert(err);
-  };
+  const { isLoggedIn } = useContext(UserContext);
 
   return (
-    <div>
-      <QrReader
-        delay={delay}
-        style={{ height: 700, width: 1920 }}
-        onError={handleError}
-        onScan={handleScan}
-        facingMode="rear"
-      />
-      <p>{result}</p>
-    </div>
+    <Container width="100%" height="fit-content" orientation="h">
+      <h1>
+        {isLoggedIn === true ? "Wybierz co chcesz zrobić" : "Zaloguj się"}
+      </h1>
+    </Container>
   );
 }
 

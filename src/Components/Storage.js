@@ -1,14 +1,16 @@
+// Frameworks imports
 import React from "react";
+
+// Helpers
+import Priv from "../Helpers/Priv";
+
+// Components
 
 function Storage(props) {
   return (
-    <div>
-      <div
-        style={{ fontSize: "3rem", fontWeight: "bold", fontFamily: "Arial" }}
-      >
-        Storage
-      </div>
-    </div>
+    <Priv>
+      <h1>TODO: Stan Magazynu</h1>
+    </Priv>
   );
 }
 
