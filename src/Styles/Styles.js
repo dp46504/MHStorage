@@ -66,4 +66,5 @@ export const LogButtonStyled = styled.button`
   border: 0.3rem solid ${colors.n1};
   mix-blend-mode: color-burn;
   cursor: pointer;
+  background-color: transparent;
 `;
