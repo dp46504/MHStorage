@@ -5,17 +5,15 @@ import React, { useContext } from "react";
 import UserContext from "../UserContext";
 
 // Components
-// eslint-disable-next-line
-import Reader from "./Reader";
 import { Container } from "../Styles/Styles";
 
 function Home(props) {
-  const { isLoggedIn } = useContext(UserContext);
+  let { currentUser } = useContext(UserContext);
 
   return (
     <Container width="100%" height="fit-content" orientation="h">
       <h1>
-        {isLoggedIn === true ? "Wybierz co chcesz zrobić" : "Zaloguj się"}
+        {currentUser !== null ? "Wybierz co chcesz zrobić" : "Zaloguj się"}
       </h1>
     </Container>
   );

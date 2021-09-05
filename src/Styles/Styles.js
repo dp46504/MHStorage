@@ -1,5 +1,6 @@
-import styled, { createGlobalStyle } from "styled-components";
+import styled, { createGlobalStyle, keyframes } from "styled-components";
 import { NavLink as navln } from "react-router-dom";
+import QrReader from "react-qr-reader";
 
 export const GlobalStyle = createGlobalStyle`
 body{
@@ -9,21 +10,24 @@ body{
 *{
     box-sizing: border-box;
     font-family: Helvetica, sans-serif;
+    
 }
 `;
 
-const colors = {
+export const colors = {
   // n1: "#121D26",
   // n2: "#025E73",
   // n3: "#026773",
   // n4: "#0396A6",
-  // n5: "#F2EDE4",
+  // n5: "#ADEBFE",
 
   n1: "#2C6655",
   n2: "#327561",
   n3: "#358768",
   n4: "#419D6D",
   n5: "#4EB06F",
+  danger: "#AA5959",
+  danger2: "#DE5959",
 };
 
 export const Container = styled.div`
@@ -34,7 +38,15 @@ export const Container = styled.div`
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
+  margin: 0 auto;
+  text-align: center;
 `;
+
+export const QrReaderStyled = styled(QrReader)`
+  width: 50%;
+  height: auto;
+`;
+
 export const Link = styled(navln)`
   font-family: Arial;
   font-weight: bold;
@@ -53,6 +65,136 @@ export const Link = styled(navln)`
   }
 `;
 
+export const Button = styled.button`
+  width: 95%;
+  height: fit-content;
+  padding: 1rem;
+  margin: 0.5rem 0.1rem;
+
+  border: 0.3rem solid
+    ${(props) => {
+      switch (props.styleState) {
+        case 0:
+          return colors.n2;
+        case 1:
+          return colors.danger;
+        case 2:
+          return colors.n5;
+        default:
+          return colors.n2;
+      }
+    }};
+  color: ${(props) => {
+    switch (props.styleState) {
+      case 0:
+        return colors.n2;
+      case 1:
+        return colors.danger;
+      case 2:
+        return colors.n5;
+      default:
+        return colors.n2;
+    }
+  }};
+  background-color: transparent;
+  font-size: ${(props) => {
+    switch (props.styleState) {
+      case 0:
+        return "1.3rem";
+      case 1:
+        return "2rem";
+      case 2:
+        return "1.3rem";
+      default:
+        return "1.3rem";
+    }
+  }};
+  font-weight: bold;
+  transition: transform 150ms;
+  &:active {
+    transform: scale(1.1);
+  }
+`;
+
+export const ScannedTextBox = styled.div`
+  width: 95%;
+  height: fit-content;
+  padding: 1rem;
+  margin: 0.5rem 0.1rem;
+  border: 0.3rem solid
+    ${(props) => {
+      switch (props.children) {
+        case null:
+          return colors.n5;
+        default:
+          return colors.danger2;
+      }
+    }};
+  color: ${(props) => {
+    switch (props.children) {
+      case null:
+        return colors.n5;
+      default:
+        return colors.danger2;
+    }
+  }};
+  background-color: transparent;
+  font-size: 1.3rem;
+  font-weight: bold;
+`;
+
+export const Input = styled.input`
+  width: 50%;
+  height: 100%;
+  text-align: center;
+  font-size: 2.2rem;
+  font-weight: bold;
+  border: none;
+`;
+
+export const ScannedTextList = styled.ul`
+  width: 95%;
+  height: fit-content;
+  padding: 0;
+  margin: 0.5rem 0.1rem;
+  border: 0.3rem dashed ${colors.n2};
+  background-color: transparent;
+  font-size: 1.5rem;
+  font-weight: bold;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 fit-content;
+
+  & li {
+    width: 100%;
+    list-style-type: none;
+    text-align: center;
+    display: grid;
+    grid-template-columns: 5fr 1fr 1fr 1fr 1fr;
+    padding: 0 0.5rem;
+    background-color: ${colors.n5};
+  }
+  & li:nth-child(n):not(:last-child) {
+    border-bottom: 0.1rem solid black;
+  }
+
+  & li * {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  & li ${Input} {
+    background-color: ${colors.n4};
+    width: 100%;
+  }
+  & li ${Input}::placeholder {
+    color: black;
+  }
+`;
+
 export const LogButtonStyled = styled.button`
   font-family: Arial;
   font-weight: bold;
@@ -67,4 +209,54 @@ export const LogButtonStyled = styled.button`
   mix-blend-mode: color-burn;
   cursor: pointer;
   background-color: transparent;
+`;
+
+export const EmojiButton = styled.button`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  font-size: 1.5rem;
+`;
+
+export const PicturePreview = styled.img`
+  width: 100vw;
+  height: auto;
+  z-index: 101;
+  position: fixed;
+  display: none;
+  background-color: transparent;
+`;
+
+const pulseAnim = keyframes`
+0%{
+transform: translateY(-1rem);
+}
+100%{
+  transform: translateY(0rem);
+}
+`;
+
+export const LoadingLayer = styled.div`
+  width: 20rem;
+  padding: 0 5rem;
+  height: 20vw;
+  top: calc(50% - 10vw);
+  left: calc(50% - 10rem);
+  z-index: 200;
+  position: fixed;
+  background-color: black;
+  opacity: 0.8;
+  color: white;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  font-weight: bold;
+  animation: ${pulseAnim} 1000ms infinite cubic-bezier(0.36, 1.02, 0.41, -0.5)
+    alternate;
+  border-radius: 2rem;
+  border: 0.5rem dotted ${colors.n2};
 `;

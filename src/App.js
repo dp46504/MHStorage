@@ -1,53 +1,47 @@
 // Frameworks imports
 import { Container, GlobalStyle, Link } from "./Styles/Styles";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import firebase from "firebase";
 
 // Helpers
 import UserContext from "./UserContext";
-import CheckIfLoggedIn from "./Helpers/CheckIfLoggedIn";
+import Priv from "./Helpers/Priv";
 
 // Components
 import Home from "./Components/Home";
 import Storage from "./Components/Storage";
+import Take from "./Components/Take";
 import LogButton from "./Components/LogButton";
 
 function App() {
-  // Setting ref to db
-  var db = firebase.firestore();
+  useEffect(() => {
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      setCurrentUser(user);
+      setLoading(false);
+      console.log(`Change to ${user === null ? "OUT" : "IN"}`);
+    });
 
-  // Initial value depend on localstorage content
-  let [isLoggedIn, setIsLoggedIn] = useState(CheckIfLoggedIn());
+    return unsubscribe;
+  }, []);
 
-  // Listener to login or logout
-  firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-      localStorage.setItem("logged", true);
-      setIsLoggedIn(true);
-    } else {
-      localStorage.removeItem("logged", false);
-      setIsLoggedIn(false);
-    }
-  });
+  let [currentUser, setCurrentUser] = useState(null);
+  let [loading, setLoading] = useState(true);
 
   return (
-    // Passing content with isLoggedIn state with his setter and ref to db
-    <UserContext.Provider value={{ db, isLoggedIn, setIsLoggedIn }}>
+    <UserContext.Provider value={{ currentUser, loading }}>
       <GlobalStyle></GlobalStyle>
 
       <Router>
         {/* Menu */}
         <Container width="100%" height="8rem" orientation="h">
           {/* Conditional render of menu */}
-          {isLoggedIn === true ? (
-            <>
-              <Link to="/take">Zabierz</Link>
-              <Link to="/give">Odłóż</Link>
-              <Link to="/storage">Stan</Link>
-              <Link to="/report">Raport</Link>
-            </>
-          ) : null}
+          <Priv>
+            <Link to="/take">Zabierz</Link>
+            <Link to="/give">Odłóż</Link>
+            <Link to="/storage">Stan</Link>
+            <Link to="/report">Raport</Link>
+          </Priv>
           <LogButton></LogButton>
         </Container>
 
@@ -55,6 +49,7 @@ function App() {
         <Switch>
           <Route path="/" exact component={Home}></Route>
           <Route path="/storage" exact component={Storage}></Route>
+          <Route path="/take" exact component={Take}></Route>
         </Switch>
         {/* End of Routes */}
       </Router>

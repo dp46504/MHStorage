@@ -1,21 +1,14 @@
 // Frameworks imports
-import { useHistory } from "react-router-dom";
-import React from "react";
+import React, { useContext } from "react";
+
+// Helpers
+import UserContext from "../UserContext";
 
 function Priv(props) {
-  let history = useHistory();
+  let { currentUser } = useContext(UserContext);
 
-  // Localstorage content of "logged" is operated by firebase login state listener
-  if (
-    localStorage.getItem("logged") === false ||
-    localStorage.getItem("logged") === null
-  ) {
-    // Redirect to "home" page
-    history.push("/");
-  }
-
-  // If logged, show all childrens of this component
-  return <>{props.children}</>;
+  // If logged, show all childrens of this component. Otherwise null is returned
+  return <>{currentUser !== null ? props.children : null}</>;
 }
 
 export default Priv;
