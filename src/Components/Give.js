@@ -18,12 +18,11 @@ import {
   LoadingLayer,
 } from "../Styles/Styles";
 
-function Take(props) {
+function Give(props) {
   // Classes
   class Item {
     constructor(qr) {
       this.loading = true;
-      this.available = null;
 
       this.qr = qr;
       this.name = null;
@@ -46,23 +45,18 @@ function Take(props) {
         .where("qr", "==", this.qr)
         .where("magazyn", "==", wybranyMagazyn);
       const query = await db.get();
-      if (query.empty) {
-        alert("W tym magazynie nie ma takiego przedmiotu");
-        this.available = false;
-        return false;
-      } else {
-        query.forEach((doc) => {
-          this.available = true;
-          const data = doc.data();
-          this.count = data.ilosc;
-          this.name = data.nazwa;
-          this.category = data.kategoria;
-          this.producer = data.producent;
-          this.magazine = data.magazyn;
-          this.id = doc.id;
-          return true;
-        });
-      }
+
+      query.forEach((doc) => {
+        this.available = true;
+        const data = doc.data();
+        this.count = data.ilosc;
+        this.name = data.nazwa;
+        this.category = data.kategoria;
+        this.producer = data.producent;
+        this.magazine = data.magazyn;
+        this.id = doc.id;
+        return true;
+      });
     };
 
     getPhotoURL = async () => {
@@ -134,13 +128,13 @@ function Take(props) {
   const ConfirmButtonText = () => {
     switch (confirm) {
       case 0:
-        return "Zabierz rzeczy z listy";
+        return "Oddaj rzeczy z listy";
       case 1:
-        return "Potwierdź Zabranie";
+        return "Potwierdź oddanie";
       case 2:
         return "Realizowanie...";
       default:
-        return "Zabierz rzeczy z listy";
+        return "Oddaj rzeczy z listy";
     }
   };
 
@@ -159,22 +153,10 @@ function Take(props) {
       LoadingScreenRef.current.style.display = "flex";
       let tab = lista;
       let item = new Item(code);
-
-      const check = setInterval(() => {
-        if (item.loading === true) {
-          console.log("Checking");
-        } else if (item.loading === false) {
-          if (item.available === true) {
-            let row = new Row(item, 0);
-            tab.push(row);
-            setLista(tab);
-          }
-          LoadingScreenRef.current.style.display = "none";
-          clearInterval(check);
-        } else {
-          console.log("Checking");
-        }
-      }, 100);
+      let row = new Row(item, 0);
+      tab.push(row);
+      setLista(tab);
+      LoadingScreenRef.current.style.display = "none";
     }
   };
   const deleteItemFromList = (item) => {
@@ -183,9 +165,7 @@ function Take(props) {
     };
 
     let newlist = lista;
-    console.log(newlist);
     newlist = newlist.filter(deleteItem);
-    console.log(newlist);
     setLista(newlist);
     item = null;
   };
@@ -199,19 +179,19 @@ function Take(props) {
       ref.style.display = "none";
     }
   };
-  // Sending info to backend about taken items and log into history
+  // Sending info to backend about given items and log into history
   const sendInfo = async (confirmStatus) => {
     if (confirmStatus === 1) {
       setConfirm(2);
       const db = firebase.firestore().collection("przedmioty");
       const dbHistory = firebase.firestore().collection("historia");
       let errorList = [];
-      // Sending info about taken items
+      // Sending info about given items
       lista.forEach((row) => {
-        let decrement = firebase.firestore.FieldValue.increment(-row.count);
+        let increment = firebase.firestore.FieldValue.increment(row.count);
         db.doc(row.item.id)
           .update({
-            ilosc: decrement,
+            ilosc: increment,
           })
           .then(() => {
             setConfirm(0);
@@ -220,7 +200,7 @@ function Take(props) {
               .add({
                 kto: firebase.auth().currentUser.email,
                 co: row.item.qr,
-                ile: -row.count,
+                ile: +row.count,
                 magazyn: row.item.magazine,
                 kiedy: firebase.firestore.Timestamp.fromDate(new Date()),
               })
@@ -291,7 +271,7 @@ function Take(props) {
                 getScannedIntoListHandler();
               }}
             >
-              Weź przedmiot
+              Odłóż przedmiot
             </Button>
 
             {/* UL with scanned items */}
@@ -304,20 +284,12 @@ function Take(props) {
                       id={index}
                       type="number"
                       placeholder={row.count}
-                      max={row.item.count}
                       onChange={() => {
                         let value = document.getElementById(index).value;
-                        let newVal = null;
-                        if (value >= row.item.count) {
-                          newVal = row.item.count;
-                        } else {
-                          newVal = value;
-                        }
-                        document.getElementById(index).value = newVal;
-                        row.count = newVal;
+                        row.count = value;
                       }}
                     />
-                    <div> / {row.item.count}</div>
+                    <div> + ({row.item.count})</div>
                     <EmojiButton
                       onClick={() => {
                         deleteItemFromList(row);
@@ -354,4 +326,4 @@ function Take(props) {
   );
 }
 
-export default Take;
+export default Give;

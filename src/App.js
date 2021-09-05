@@ -13,6 +13,7 @@ import Home from "./Components/Home";
 import Storage from "./Components/Storage";
 import Take from "./Components/Take";
 import LogButton from "./Components/LogButton";
+import Give from "./Components/Give";
 
 function App() {
   useEffect(() => {
@@ -50,6 +51,7 @@ function App() {
           <Route path="/" exact component={Home}></Route>
           <Route path="/storage" exact component={Storage}></Route>
           <Route path="/take" exact component={Take}></Route>
+          <Route path="/give" exact component={Give}></Route>
         </Switch>
         {/* End of Routes */}
       </Router>

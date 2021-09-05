@@ -173,17 +173,22 @@ export const ScannedTextList = styled.ul`
     text-align: center;
     display: grid;
     grid-template-columns: 5fr 1fr 1fr 1fr 1fr;
-    padding: 0 0.5rem;
+    padding: 0.5rem 0.5rem;
     background-color: ${colors.n5};
   }
   & li:nth-child(n):not(:last-child) {
     border-bottom: 0.1rem solid black;
   }
 
+  /* & li:first-child {
+    font-size: 1rem;
+  } */
+
   & li * {
     display: flex;
     justify-content: center;
     align-items: center;
+    font-size: 1.2rem;
   }
 
   & li ${Input} {
@@ -222,10 +227,14 @@ export const EmojiButton = styled.button`
 `;
 
 export const PicturePreview = styled.img`
-  width: 100vw;
+  width: 60vw;
   height: auto;
   z-index: 101;
   position: fixed;
+  top: 20%;
+  left: calc(50% - 30vw);
+  border: 0.3rem solid ${colors.n2};
+
   display: none;
   background-color: transparent;
 `;
