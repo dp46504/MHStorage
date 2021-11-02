@@ -62,7 +62,7 @@ function Give(props) {
     getPhotoURL = async () => {
       const storageRef = firebase.storage().ref();
       storageRef
-        .child(`${this.qr}.jpg`)
+        .child(`${this.qr}`)
         .getDownloadURL()
         .then((url) => {
           this.photoURL = url;

@@ -14,6 +14,8 @@ import Storage from "./Components/Storage";
 import Take from "./Components/Take";
 import LogButton from "./Components/LogButton";
 import Give from "./Components/Give";
+import AddItem from "./Components/AddItem";
+import SmallAmount from "./Components/SmallAmount";
 
 function App() {
   useEffect(() => {
@@ -37,13 +39,15 @@ function App() {
         {/* Menu */}
         <Container width="100%" height="8rem" orientation="h">
           {/* Conditional render of menu */}
+          <LogButton></LogButton>
           <Priv>
             <Link to="/take">Zabierz</Link>
             <Link to="/give">Odłóż</Link>
             <Link to="/storage">Stan</Link>
             <Link to="/report">Raport</Link>
+            <Link to="/additem">+</Link>
+            <Link to="/smallamount">Restock</Link>
           </Priv>
-          <LogButton></LogButton>
         </Container>
 
         {/* Routes */}
@@ -52,6 +56,8 @@ function App() {
           <Route path="/storage" exact component={Storage}></Route>
           <Route path="/take" exact component={Take}></Route>
           <Route path="/give" exact component={Give}></Route>
+          <Route path="/smallamount" exact component={SmallAmount}></Route>
+          <Route path="/additem" exact component={AddItem}></Route>
         </Switch>
         {/* End of Routes */}
       </Router>

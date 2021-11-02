@@ -28,6 +28,8 @@ export const colors = {
   n5: "#4EB06F",
   danger: "#AA5959",
   danger2: "#DE5959",
+  orange: "#e0aa07",
+  red: "#ab2b37",
 };
 
 export const Container = styled.div`
@@ -53,21 +55,40 @@ export const Link = styled(navln)`
   font-size: 2rem;
   text-decoration: none;
   text-align: center;
+  position: relative;
   padding: 0.5rem;
   margin: 0.25rem;
   flex: 1 1 15%;
   color: ${colors.n3};
-  mix-blend-mode: color-burn;
-  border: 0.3rem dashed ${colors.n3};
+  transition: all 500ms;
+
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 0.4rem;
+    bottom: 0;
+    left: 0;
+    background-color: ${colors.n1};
+    transition: all 500ms;
+  }
+
   &.active {
-    border: 0.3rem solid ${colors.n4};
-    color: ${colors.n4};
+    &:before {
+      height: 100%;
+      background-image: linear-gradient(to top, ${colors.n1}, ${colors.n4});
+      opacity: 0.5;
+    }
+    color: black;
+    text-shadow: 0.5rem 0.5rem 1rem ${colors.n1};
   }
 `;
 
 export const Button = styled.button`
   width: 95%;
   height: fit-content;
+  position: relative;
   padding: 1rem;
   margin: 0.5rem 0.1rem;
 
@@ -125,7 +146,7 @@ export const ScannedTextBox = styled.div`
     ${(props) => {
       switch (props.children) {
         case null:
-          return colors.n5;
+          return colors.n4;
         default:
           return colors.danger2;
       }
@@ -133,7 +154,7 @@ export const ScannedTextBox = styled.div`
   color: ${(props) => {
     switch (props.children) {
       case null:
-        return colors.n5;
+        return colors.n4;
       default:
         return colors.danger2;
     }
@@ -143,13 +164,37 @@ export const ScannedTextBox = styled.div`
   font-weight: bold;
 `;
 
-export const Input = styled.input`
-  width: 50%;
+export const Form = styled.form`
+  width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+export const Input = styled.input`
+  width: 90%;
   text-align: center;
-  font-size: 2.2rem;
+  font-size: 1.8rem;
   font-weight: bold;
-  border: none;
+  position: relative;
+  border: 0.3rem dashed ${colors.n1};
+  transition: transform 500ms;
+  margin: 0.3rem;
+  &::placeholder {
+    transition: transform 500ms;
+  }
+
+  &:focus {
+    outline: none;
+    border: 0.3rem solid ${colors.n5};
+    transform: scale(1.05);
+
+    &::placeholder {
+      transform: translateX(-30%) scale(0.7);
+    }
+  }
 `;
 
 export const ScannedTextList = styled.ul`
@@ -157,7 +202,7 @@ export const ScannedTextList = styled.ul`
   height: fit-content;
   padding: 0;
   margin: 0.5rem 0.1rem;
-  border: 0.3rem dashed ${colors.n2};
+  border: 0.3rem solid ${colors.n2};
   background-color: transparent;
   font-size: 1.5rem;
   font-weight: bold;
@@ -194,6 +239,7 @@ export const ScannedTextList = styled.ul`
   & li ${Input} {
     background-color: ${colors.n4};
     width: 100%;
+    border: none;
   }
   & li ${Input}::placeholder {
     color: black;
@@ -208,12 +254,37 @@ export const LogButtonStyled = styled.button`
   text-align: center;
   padding: 0.5rem;
   margin: 0.25rem;
-  flex: 0 1 7%;
-  color: ${colors.n1};
-  border: 0.3rem solid ${colors.n1};
-  mix-blend-mode: color-burn;
+  flex: 1 0 100%;
+  color: ${colors.danger};
+  border: none;
+  opacity: 0.5;
+
   cursor: pointer;
   background-color: transparent;
+  position: relative;
+  transition: all 500ms;
+
+  &:hover {
+    &:before {
+      height: 100%;
+      mix-blend-mode: color-dodge;
+      background-color: ${colors.danger2};
+    }
+    color: white;
+    opacity: 1;
+  }
+
+  &:before {
+    content: "";
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 0.4rem;
+    bottom: 0;
+    left: 0;
+    background-color: ${colors.danger};
+    transition: all 500ms;
+  }
 `;
 
 export const EmojiButton = styled.button`
@@ -228,10 +299,10 @@ export const EmojiButton = styled.button`
 
 export const PicturePreview = styled.img`
   width: 60vw;
-  height: auto;
+  height: 90vw;
   z-index: 101;
   position: fixed;
-  top: 20%;
+  top: calc(50% - 45vw);
   left: calc(50% - 30vw);
   border: 0.3rem solid ${colors.n2};
 
@@ -268,4 +339,79 @@ export const LoadingLayer = styled.div`
     alternate;
   border-radius: 2rem;
   border: 0.5rem dotted ${colors.n2};
+`;
+
+export const TableTitle = styled.div`
+  width: 100%;
+  padding: 1rem;
+  font-weight: bold;
+  font-size: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+
+  &:not(:first-of-type) {
+    border-top: 0.3rem solid black;
+  }
+`;
+
+export const TableColumnTitles = styled.div`
+  width: 100%;
+  display: grid;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+  font-weight: bold;
+  align-items: center;
+  grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+  font-size: 1.2rem;
+`;
+
+export const TableWrapper = styled.div`
+  width: 100%;
+  height: fit-content;
+`;
+
+export const TableRow = styled.div`
+  width: 100%;
+  display: grid;
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+  font-size: 1.4rem;
+
+  grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+  background-color: ${(props) => {
+    if (props.color === "o") {
+      return colors.orange;
+    } else {
+      return colors.red;
+    }
+  }};
+`;
+
+export const PopUpWindow = styled.div`
+  position: fixed;
+  width: 65%;
+  height: fit-content;
+
+  top: auto;
+  left: auto;
+
+  z-index: 300;
+  padding: 0.3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  &:before {
+    content: "";
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: white;
+    opacity: 0.8;
+  }
 `;
