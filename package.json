@@ -21,6 +21,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
+    "react-search-box": "^2.2.0",
     "react-table": "^7.7.0",
     "react-webcam-barcode-scanner": "^0.0.2-rc2",
     "react-weblineindia-qrcode-scanner": "^1.0.0",

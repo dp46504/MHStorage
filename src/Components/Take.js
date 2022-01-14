@@ -1,6 +1,7 @@
 // Frameworks imports
 import React, { useState, useEffect, useRef } from "react";
 import firebase from "firebase";
+import ReactSearchBox from "react-search-box";
 
 // Helpers
 import Priv from "../Helpers/Priv";
@@ -124,6 +125,8 @@ function Take(props) {
   let [wybranyMagazyn, setWybranyMagazyn] = useState(null);
   let [code, setCode] = useState("");
   let [lista, setLista] = useState([]);
+  let [metoda, setMetoda]=useState(null);
+  let [items, setItems]=useState(null);
   // Confirm Button States
   // 0 - didn't click on confirm
   // 1 - clicked on confirm and need to click again
@@ -143,6 +146,27 @@ function Take(props) {
         return "Zabierz rzeczy z listy";
     }
   };
+
+  // Download all items from selected storage to help input their names. On 'metoda' set to 'recznie'
+  useEffect(() => {
+    const getItems = async() =>{
+      const itemsRef = firebase.firestore().collection("przedmioty").where("magazyn","==",wybranyMagazyn);
+      const items = await itemsRef.get()
+      let itemsArray=[]
+      items.forEach((item) => {
+        itemsArray.push(
+          {key:item.data().qr, value:item.data().nazwa}
+        )
+      })
+
+
+      setItems(itemsArray)
+    }
+    // If metoda==='recznie' download items
+    if(metoda==='recznie'){
+      getItems()
+    }
+  },[metoda])
 
   // QR Scanner Handlers
   const onScanHandler = (result) => {
@@ -272,7 +296,17 @@ function Take(props) {
         {wybranyMagazyn === null ? (
           listaMagazynow
         ) : (
-          <>
+          // Select input method
+          metoda=== null?(
+            <>
+            <h1>Wybierz metode</h1>
+            <Button onClick={()=>{setMetoda('recznie')}}>Ręcznie</Button>
+            <Button onClick={()=>{setMetoda('skanowanie')}}>Skanowanie</Button>
+            </>
+          ):(
+            // Render controls according to input method
+            metoda==="skanowanie"?(
+<>
             {/* QR Reader */}
             <QrReaderStyled
               onScan={onScanHandler}
@@ -348,6 +382,19 @@ function Take(props) {
               {ConfirmButtonText()}
             </Button>
           </>
+            ):(
+              // TODO RECZNE WPROWADZANIE
+              items===null?(<></>):(
+                <>
+              <ReactSearchBox
+              data={items}
+              ></ReactSearchBox>
+              </>
+              )
+              
+
+            )
+          )
         )}
       </Container>
     </Priv>
