@@ -229,7 +229,7 @@ function SmallAmount(props) {
     <Priv>
       {/* hidden loading layer */}
       <LoadingLayer ref={loadingLayerRef}>Loading...</LoadingLayer>
-      <PopUp></PopUp>
+      {/* <PopUp></PopUp> */}
       {/* Main Container */}
       <Container orientation="v" width="100%">
         {/* Main Button to download data */}
