@@ -14,6 +14,8 @@ function SearchBar(props) {
   const [list, setList] = useState([]);
   // Ref to InputField
   const InputFieldRef = useRef(null);
+  // Function to set state at parent
+  const setter = props.setter;
 
   //   Function to set list to object that name match the input from input
   const filterResultList = (inputValue) => {
@@ -45,9 +47,9 @@ function SearchBar(props) {
     <>
       {/* Input to provide text to match item name */}
       <Container
-        width="90%"
+        width="95%"
         orientation="h"
-        style={{ border: `0.15rem solid ${colors.n1}` }}
+        style={{ border: `0.3rem solid ${colors.n1}`, marginTop: "1rem" }}
       >
         <Input
           style={{ width: "90%", border: "none" }}
@@ -55,6 +57,7 @@ function SearchBar(props) {
           onChange={(e) => {
             // Updating result list state
             filterResultList(e.target.value);
+            setter(e.target.value);
           }}
         ></Input>
         <Button
@@ -63,6 +66,10 @@ function SearchBar(props) {
             fontSize: "1rem",
             padding: "0",
             border: "none",
+          }}
+          onClick={() => {
+            InputFieldRef.current.value = "";
+            setter("");
           }}
         >
           ❌
@@ -75,7 +82,7 @@ function SearchBar(props) {
           style={{
             width: "90%",
             marginTop: "0",
-            border: `0.15rem solid ${colors.n1}`,
+            border: `0.3rem solid ${colors.n1}`,
             borderTop: "none",
           }}
         >
@@ -85,6 +92,7 @@ function SearchBar(props) {
                 style={{ padding: ".2rem .2rem" }}
                 onClick={() => {
                   putIntoInputField(listItem.nazwa);
+                  setter(listItem.nazwa);
                 }}
               >
                 <div style={{ gridColumnStart: "1", gridColumnEnd: "3" }}>

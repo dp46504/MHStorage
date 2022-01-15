@@ -17,7 +17,6 @@ import {
   EmojiButton,
   PicturePreview,
   LoadingLayer,
-  colors,
 } from "../Styles/Styles";
 
 function Take(props) {
@@ -29,13 +28,13 @@ function Take(props) {
       this.available = data === null ? null : true;
 
       // If data not provided set all to null and then request to databse
-      this.qr = data === null ? qr : data.qr;
+      this.qr = qr;
       this.name = data === null ? null : data.nazwa;
       this.category = data === null ? null : data.kategoria;
       this.producer = data === null ? null : data.producent;
       this.magazine = data === null ? null : data.magazyn;
       this.count = data === null ? null : data.ilosc;
-      this.id = null;
+      this.id = data === null ? null : data.id;
 
       // If data not provided request data from database. set loading to be over otherwise because data is already assigned
       if (data === null) {
@@ -85,7 +84,7 @@ function Take(props) {
           this.photoURL = url;
         })
         .catch((error) => {
-          console.log(`Nie ma zdjecia dla ${this.qr}`);
+          console.log(`Nie ma zdjecia dla ${this.qr}\n`, error);
           this.photoURL = null;
         });
     };
@@ -167,7 +166,7 @@ function Take(props) {
       const items = await itemsRef.get();
       let itemsArray = [];
       items.forEach((item) => {
-        itemsArray.push(item.data());
+        itemsArray.push({ ...item.data(), id: item.id });
       });
 
       setItems(itemsArray);
@@ -187,12 +186,31 @@ function Take(props) {
   };
 
   // List operations functions
-  const getScannedIntoListHandler = async () => {
+  const getScannedIntoListHandler = async (manual = false) => {
     if (code === "" || code === null || code === undefined) {
     } else {
       LoadingScreenRef.current.style.display = "flex";
       let tab = lista;
-      let item = new Item(code);
+
+      let item = null;
+
+      if (manual) {
+        const comparator = (item) => {
+          return item.nazwa === code;
+        };
+        let found = items.filter(comparator);
+        console.log(`ITEMS:\n`, items);
+        console.log(`FOUND:\n`, found);
+        console.log("CODE: ", code);
+        if (found.length !== 0) {
+          item = new Item(found[0].qr, true, found[0]);
+          console.log("ITEM:\n", item);
+        } else {
+          return alert("Nie ma przedmiotu o takiej nazwie");
+        }
+      } else {
+        item = new Item(code);
+      }
 
       const check = setInterval(() => {
         if (item.loading === true) {
@@ -211,6 +229,7 @@ function Take(props) {
       }, 100);
     }
   };
+
   const deleteItemFromList = (item) => {
     const deleteItem = (itemRef) => {
       return itemRef !== item;
@@ -303,113 +322,183 @@ function Take(props) {
       {/* Main Container with conditional rendering after selecting storage */}
       <Container width="100%" orientation="v">
         {wybranyMagazyn === null ? <h1>Wybierz magazyn</h1> : null}
-        {wybranyMagazyn === null ? (
-          listaMagazynow
-        ) : // Select input method
-        metoda === null ? (
-          <>
-            <h1>Wybierz metode</h1>
-            <Button
-              onClick={() => {
-                setMetoda("recznie");
-              }}
-            >
-              Ręcznie
-            </Button>
-            <Button
-              onClick={() => {
-                setMetoda("skanowanie");
-              }}
-            >
-              Skanowanie
-            </Button>
-          </>
-        ) : // Render controls according to input method
-        metoda === "skanowanie" ? (
-          <>
-            {/* QR Reader */}
-            <QrReaderStyled
-              onScan={onScanHandler}
-              onError={onErrorHandler}
-              delay={800}
-              facingMode={"environment"}
-              showViewFinder={true}
-            ></QrReaderStyled>
+        {
+          wybranyMagazyn === null ? (
+            listaMagazynow
+          ) : // Select input method
+          metoda === null ? (
+            <>
+              <h1>Wybierz metode</h1>
+              <Button
+                onClick={() => {
+                  setMetoda("recznie");
+                }}
+              >
+                Ręcznie
+              </Button>
+              <Button
+                onClick={() => {
+                  setMetoda("skanowanie");
+                }}
+              >
+                Skanowanie
+              </Button>
+            </>
+          ) : // Render controls according to input method
+          metoda === "skanowanie" ? (
+            <>
+              {/* QR Reader */}
+              <QrReaderStyled
+                onScan={onScanHandler}
+                onError={onErrorHandler}
+                delay={800}
+                facingMode={"environment"}
+                showViewFinder={true}
+              ></QrReaderStyled>
 
-            {/* Box with scanned code */}
-            <ScannedTextBox>{code}</ScannedTextBox>
+              {/* Box with scanned code */}
+              <ScannedTextBox>{code}</ScannedTextBox>
 
-            {/* Button which take scanned code and insert Item into List */}
-            <Button
-              onClick={() => {
-                getScannedIntoListHandler();
-              }}
-            >
-              Weź przedmiot
-            </Button>
+              {/* Button which take scanned code and insert Item into List */}
+              <Button
+                onClick={() => {
+                  getScannedIntoListHandler();
+                }}
+              >
+                Weź przedmiot
+              </Button>
 
-            {/* UL with scanned items */}
-            <ScannedTextList>
-              {lista.map((row, index) => {
-                return (
-                  <li key={index}>
-                    <div>{row.item.name}</div>
-                    <Input
-                      id={index}
-                      type="number"
-                      placeholder={row.count}
-                      max={row.item.count}
-                      onChange={() => {
-                        let value = document.getElementById(index).value;
-                        let newVal = null;
-                        if (value >= row.item.count) {
-                          newVal = row.item.count;
-                        } else {
-                          newVal = value;
-                        }
-                        document.getElementById(index).value = newVal;
-                        row.count = newVal;
-                      }}
-                    />
-                    <div> / {row.item.count}</div>
-                    <EmojiButton
-                      onClick={() => {
-                        deleteItemFromList(row);
-                      }}
-                    >
-                      ❌
-                    </EmojiButton>
-                    <EmojiButton
-                      onClick={() => {
-                        ItemPhotoHandler(row.item.photoURL);
-                      }}
-                    >
-                      📷
-                    </EmojiButton>
-                  </li>
-                );
-              })}
-            </ScannedTextList>
+              {/* UL with scanned items */}
+              <ScannedTextList>
+                {lista.map((row, index) => {
+                  return (
+                    <li key={index}>
+                      <div>{row.item.name}</div>
+                      <Input
+                        id={index}
+                        type="number"
+                        placeholder={row.count}
+                        max={row.item.count}
+                        onChange={() => {
+                          let value = document.getElementById(index).value;
+                          let newVal = null;
+                          if (value >= row.item.count) {
+                            newVal = row.item.count;
+                          } else {
+                            newVal = value;
+                          }
+                          document.getElementById(index).value = newVal;
+                          row.count = newVal;
+                        }}
+                      />
+                      <div> / {row.item.count}</div>
+                      <EmojiButton
+                        onClick={() => {
+                          deleteItemFromList(row);
+                        }}
+                      >
+                        ❌
+                      </EmojiButton>
+                      <EmojiButton
+                        onClick={() => {
+                          ItemPhotoHandler(row.item.photoURL);
+                        }}
+                      >
+                        📷
+                      </EmojiButton>
+                    </li>
+                  );
+                })}
+              </ScannedTextList>
 
-            {/* Confirm Button */}
-            <Button
-              onClick={() => {
-                sendInfo(confirm);
-                setConfirm((confirm + 1) % 3);
-              }}
-              styleState={confirm}
-            >
-              {ConfirmButtonText()}
-            </Button>
-          </>
-        ) : // TODO RECZNE WPROWADZANIE
-        items === null ? (
-          <></>
-        ) : (
-          <>
-            <SearchBox data={items}></SearchBox>
-          </>
-        )}
+              {/* Confirm Button */}
+              <Button
+                onClick={() => {
+                  sendInfo(confirm);
+                  setConfirm((confirm + 1) % 3);
+                }}
+                styleState={confirm}
+              >
+                {ConfirmButtonText()}
+              </Button>
+            </>
+          ) : // TODO RECZNE WPROWADZANIE
+          items === null ? (
+            <></>
+          ) : (
+            <>
+              <SearchBox
+                setter={(data) => {
+                  setCode(data);
+                }}
+                data={items}
+              ></SearchBox>
+              {/* Button which take scanned code and insert Item into List */}
+              <Button
+                onClick={() => {
+                  getScannedIntoListHandler(true);
+                }}
+              >
+                Weź przedmiot
+              </Button>
+              {lista.length !== 0 && (
+                <ScannedTextList>
+                  {lista.map((row, index) => {
+                    return (
+                      <li key={index}>
+                        <div>{row.item.name}</div>
+                        <Input
+                          id={index}
+                          type="number"
+                          placeholder={row.count}
+                          max={row.item.count}
+                          onChange={() => {
+                            let value = document.getElementById(index).value;
+                            let newVal = null;
+                            if (value >= row.item.count) {
+                              newVal = row.item.count;
+                            } else {
+                              newVal = value;
+                            }
+                            document.getElementById(index).value = newVal;
+                            row.count = newVal;
+                          }}
+                        />
+                        <div> / {row.item.count}</div>
+                        <EmojiButton
+                          onClick={() => {
+                            deleteItemFromList(row);
+                          }}
+                        >
+                          ❌
+                        </EmojiButton>
+                        <EmojiButton
+                          onClick={() => {
+                            ItemPhotoHandler(row.item.photoURL);
+                          }}
+                        >
+                          📷
+                        </EmojiButton>
+                      </li>
+                    );
+                  })}
+                </ScannedTextList>
+              )}
+              {/* Confirm Button */}
+              <Button
+                onClick={() => {
+                  sendInfo(confirm);
+                  setConfirm((confirm + 1) % 3);
+                }}
+                styleState={confirm}
+              >
+                {ConfirmButtonText()}
+              </Button>
+            </>
+          )
+
+          // TODO KONIEC RECZNEGO WPROWADZANIA
+        }
       </Container>
     </Priv>
   );
