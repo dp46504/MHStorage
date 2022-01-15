@@ -1,6 +1,7 @@
 import styled, { createGlobalStyle, keyframes } from "styled-components";
 import { NavLink as navln } from "react-router-dom";
 import QrReader from "react-qr-reader";
+import ReactSearchBox from "react-search-box";
 
 export const GlobalStyle = createGlobalStyle`
 body{
@@ -179,7 +180,7 @@ export const Input = styled.input`
   font-size: 1.8rem;
   font-weight: bold;
   position: relative;
-  border: 0.3rem dashed ${colors.n1};
+  border: 0.18rem dashed ${colors.n1};
   transition: transform 500ms;
   margin: 0.3rem;
   &::placeholder {
@@ -414,4 +415,8 @@ export const PopUpWindow = styled.div`
     background-color: white;
     opacity: 0.8;
   }
+`;
+
+export const SearchBox = styled(ReactSearchBox)`
+  width: 100%;
 `;

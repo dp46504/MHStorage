@@ -1,10 +1,10 @@
 // Frameworks imports
 import React, { useState, useEffect, useRef } from "react";
 import firebase from "firebase";
-import ReactSearchBox from "react-search-box";
 
 // Helpers
 import Priv from "../Helpers/Priv";
+import SearchBox from "../Helpers/SearchBar";
 
 // Components
 import {
@@ -17,25 +17,35 @@ import {
   EmojiButton,
   PicturePreview,
   LoadingLayer,
+  colors,
 } from "../Styles/Styles";
 
 function Take(props) {
   // Classes
   class Item {
-    constructor(qr) {
+    constructor(qr, dataAlreadyDownloaded = false, data = null) {
       this.loading = true;
-      this.available = null;
+      // If there is already data that means the item is in that storage
+      this.available = data === null ? null : true;
 
-      this.qr = qr;
-      this.name = null;
-      this.category = null;
-      this.producer = null;
-      this.magazine = null;
-      this.count = null;
+      // If data not provided set all to null and then request to databse
+      this.qr = data === null ? qr : data.qr;
+      this.name = data === null ? null : data.nazwa;
+      this.category = data === null ? null : data.kategoria;
+      this.producer = data === null ? null : data.producent;
+      this.magazine = data === null ? null : data.magazyn;
+      this.count = data === null ? null : data.ilosc;
       this.id = null;
-      this.setMetaData().then((result) => {
+
+      // If data not provided request data from database. set loading to be over otherwise because data is already assigned
+      if (data === null) {
+        this.setMetaData().then((result) => {
+          this.loading = false;
+        });
+      } else {
         this.loading = false;
-      });
+      }
+
       this.photoURL = null;
       this.getPhotoURL();
     }
@@ -125,8 +135,8 @@ function Take(props) {
   let [wybranyMagazyn, setWybranyMagazyn] = useState(null);
   let [code, setCode] = useState("");
   let [lista, setLista] = useState([]);
-  let [metoda, setMetoda]=useState(null);
-  let [items, setItems]=useState(null);
+  let [metoda, setMetoda] = useState(null);
+  let [items, setItems] = useState(null);
   // Confirm Button States
   // 0 - didn't click on confirm
   // 1 - clicked on confirm and need to click again
@@ -149,24 +159,24 @@ function Take(props) {
 
   // Download all items from selected storage to help input their names. On 'metoda' set to 'recznie'
   useEffect(() => {
-    const getItems = async() =>{
-      const itemsRef = firebase.firestore().collection("przedmioty").where("magazyn","==",wybranyMagazyn);
-      const items = await itemsRef.get()
-      let itemsArray=[]
+    const getItems = async () => {
+      const itemsRef = firebase
+        .firestore()
+        .collection("przedmioty")
+        .where("magazyn", "==", wybranyMagazyn);
+      const items = await itemsRef.get();
+      let itemsArray = [];
       items.forEach((item) => {
-        itemsArray.push(
-          {key:item.data().qr, value:item.data().nazwa}
-        )
-      })
+        itemsArray.push(item.data());
+      });
 
-
-      setItems(itemsArray)
-    }
+      setItems(itemsArray);
+    };
     // If metoda==='recznie' download items
-    if(metoda==='recznie'){
-      getItems()
+    if (metoda === "recznie") {
+      getItems();
     }
-  },[metoda])
+  }, [metoda]);
 
   // QR Scanner Handlers
   const onScanHandler = (result) => {
@@ -295,18 +305,28 @@ function Take(props) {
         {wybranyMagazyn === null ? <h1>Wybierz magazyn</h1> : null}
         {wybranyMagazyn === null ? (
           listaMagazynow
-        ) : (
-          // Select input method
-          metoda=== null?(
-            <>
+        ) : // Select input method
+        metoda === null ? (
+          <>
             <h1>Wybierz metode</h1>
-            <Button onClick={()=>{setMetoda('recznie')}}>Ręcznie</Button>
-            <Button onClick={()=>{setMetoda('skanowanie')}}>Skanowanie</Button>
-            </>
-          ):(
-            // Render controls according to input method
-            metoda==="skanowanie"?(
-<>
+            <Button
+              onClick={() => {
+                setMetoda("recznie");
+              }}
+            >
+              Ręcznie
+            </Button>
+            <Button
+              onClick={() => {
+                setMetoda("skanowanie");
+              }}
+            >
+              Skanowanie
+            </Button>
+          </>
+        ) : // Render controls according to input method
+        metoda === "skanowanie" ? (
+          <>
             {/* QR Reader */}
             <QrReaderStyled
               onScan={onScanHandler}
@@ -382,19 +402,13 @@ function Take(props) {
               {ConfirmButtonText()}
             </Button>
           </>
-            ):(
-              // TODO RECZNE WPROWADZANIE
-              items===null?(<></>):(
-                <>
-              <ReactSearchBox
-              data={items}
-              ></ReactSearchBox>
-              </>
-              )
-              
-
-            )
-          )
+        ) : // TODO RECZNE WPROWADZANIE
+        items === null ? (
+          <></>
+        ) : (
+          <>
+            <SearchBox data={items}></SearchBox>
+          </>
         )}
       </Container>
     </Priv>
