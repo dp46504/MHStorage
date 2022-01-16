@@ -169,6 +169,11 @@ export const ScannedTextBox = styled.div`
   font-weight: bold;
 `;
 
+export const Label = styled.label`
+  font-size: 1.5rem;
+  font-weight: bold;
+`;
+
 export const Form = styled.form`
   width: 100%;
   height: 100%;
@@ -176,6 +181,14 @@ export const Form = styled.form`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  & *:not(Label) {
+    margin-bottom: 1rem;
+  }
+
+  & Input {
+    border: none;
+    border-bottom: 0.2rem solid ${colors.n4};
+  }
 `;
 
 export const Input = styled.input`

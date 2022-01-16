@@ -5,7 +5,7 @@ import firebase from "firebase";
 import convert from "image-file-resize";
 
 // Components
-import { Container, Input, Form, Button } from "../Styles/Styles";
+import { Container, Input, Form, Button, Label } from "../Styles/Styles";
 
 // Helpers
 import Priv from "../Helpers/Priv";
@@ -51,6 +51,7 @@ function AddItem(props) {
       nazwa: data.name,
       producent: data.producer,
       qr: data.qr,
+      cena: parseFloat(data.price),
     };
 
     data.mag.forEach((quantity, index) => {
@@ -64,8 +65,9 @@ function AddItem(props) {
 
   return (
     <Priv>
-      <Container width="100%" orientation="v">
+      <Container width="90%" orientation="v">
         <Form onSubmit={handleSubmit(onSubmit)}>
+          <Label for="name">Nazwa ⬇️</Label>
           <Input
             placeholder="Nazwa"
             id="name"
@@ -73,6 +75,7 @@ function AddItem(props) {
             {...register("name")}
           ></Input>
 
+          <Label for="category">Kategoria ⬇️</Label>
           <Input
             placeholder="Kategoria"
             id="category"
@@ -80,6 +83,7 @@ function AddItem(props) {
             {...register("category")}
           ></Input>
 
+          <Label for="producer">Producent ⬇️</Label>
           <Input
             placeholder="Producent"
             id="producer"
@@ -87,11 +91,14 @@ function AddItem(props) {
             {...register("producer")}
           ></Input>
 
+          <Label for="small">Mała ilość ⬇️</Label>
           <Input
+            id="small"
             placeholder="Mała Ilość"
             {...register("smallQuantity")}
           ></Input>
 
+          <Label for="qr">QR ⬇️</Label>
           <Input
             placeholder="Numer kat."
             id="qr"
@@ -102,14 +109,28 @@ function AddItem(props) {
           {listaMagazynow !== null &&
             listaMagazynow.map((magazine) => {
               return (
-                <Input
-                  {...register(`mag.${magazine.id}`)}
-                  key={magazine.id}
-                  placeholder={`Magazyn ${magazine.ulica} ${magazine.blok} ilość`}
-                ></Input>
+                <>
+                  <Label for={magazine.id}>
+                    Ilosc w magazynie: {magazine.ulica} {magazine.blok} ⬇️
+                  </Label>
+                  <Input
+                    {...register(`mag.${magazine.id}`)}
+                    id={magazine.id}
+                    key={magazine.id}
+                    placeholder={`Magazyn ${magazine.ulica} ${magazine.blok} ilość`}
+                  ></Input>
+                </>
               );
             })}
 
+          <Label for="price">Cena ⬇️</Label>
+          <Input
+            {...register("price")}
+            id="price"
+            type="number"
+            placeholder="Cena"
+            step="0.01"
+          ></Input>
           <img src={photoURL} alt="item"></img>
 
           <Input
@@ -136,30 +157,6 @@ function AddItem(props) {
                 .catch((error) => {
                   alert(error);
                 });
-              // let canv = photoRef.current;
-              // let ctx = canv.getContext("2d");
-              // let img = new Image();
-
-              // img.onload = () => {
-              //   let ratio = Math.min(
-              //     thumbnailSize[0] / img.naturalWidth,
-              //     thumbnailSize[1] / img.naturalHeight
-              //   );
-              //   ctx.drawImage(
-              //     img,
-              //     canv.width / 2 - (img.naturalWidth * ratio) / 2,
-              //     canv.height / 2 - (img.naturalHeight * ratio) / 2,
-              //     img.naturalWidth * ratio,
-              //     img.naturalHeight * ratio
-              //   );
-              // };
-
-              // img.src = URL.createObjectURL(file);
-              // setTimeout(() => {
-              //   canv.toBlob((blob) => {
-              //     setPhoto(blob);
-              //   }, "image/jpg");
-              // }, 1000);
             }}
           />
 
