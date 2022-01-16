@@ -4,7 +4,6 @@ import firebase from "firebase";
 
 //* Componentes
 import {
-  PopUpWindow,
   TableColumnTitles,
   TableRow,
   TableTitle,
@@ -14,7 +13,6 @@ import {
 //* Helpers
 import Priv from "../Helpers/Priv";
 import { Button, Container, LoadingLayer } from "../Styles/Styles";
-import PopUp from "../Helpers/PopUp";
 
 function SmallAmount(props) {
   //* States
@@ -22,11 +20,9 @@ function SmallAmount(props) {
 
   //* Refs
   const loadingLayerRef = useRef(null);
-  const tableRef = useRef(null);
 
   //* Variables
   const db = firebase.firestore();
-  let allItems = [];
   let sortedData = [];
   let [tableJSX, setTableJSX] = useState(null);
 
@@ -49,7 +45,6 @@ function SmallAmount(props) {
     query.forEach((item) => {
       items.push(item.data());
     });
-    allItems = items;
     return items;
   };
 

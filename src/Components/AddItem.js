@@ -1,5 +1,5 @@
 // Frameworks imports
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import firebase from "firebase";
 import convert from "image-file-resize";
@@ -149,7 +149,7 @@ function AddItem(props) {
                 type: "jpeg",
               })
                 .then((resp) => {
-                  const reader = new FileReader();
+                  // const reader = new FileReader();
 
                   setPhoto(resp);
                   setPhotoURL(URL.createObjectURL(resp));

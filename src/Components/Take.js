@@ -175,6 +175,7 @@ function Take(props) {
     if (metoda === "recznie") {
       getItems();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metoda]);
 
   // QR Scanner Handlers
