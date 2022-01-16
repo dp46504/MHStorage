@@ -88,6 +88,12 @@ export const Link = styled(navln)`
     color: black;
     text-shadow: 0.5rem 0.5rem 1rem ${colors.n1};
   }
+
+  &:hover {
+    transform: translateY(-0.4rem);
+    color: ${colors.n1};
+    text-shadow: 0.5rem 0.5rem 1rem ${colors.n1};
+  }
 `;
 
 export const Button = styled.button`
