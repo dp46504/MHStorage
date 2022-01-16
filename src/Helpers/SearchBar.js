@@ -23,7 +23,10 @@ function SearchBar(props) {
     let resultList = [];
     // Checking if [inputValue] is a substring of a item name
     data.forEach((item) => {
-      if (inputValue !== "" && item.nazwa.includes(inputValue)) {
+      if (
+        inputValue !== "" &&
+        item.nazwa.toLowerCase().includes(inputValue.toLowerCase())
+      ) {
         //   If length of a list is not exciding 10, append item to the list
         if (list.length < 10) {
           resultList.push(item);
