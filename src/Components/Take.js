@@ -373,7 +373,6 @@ function Take(props) {
                       <Input
                         id={index}
                         type="number"
-                        style={{ width: "fit-content" }}
                         placeholder={row.count}
                         max={row.item.count}
                         onChange={() => {
@@ -388,9 +387,7 @@ function Take(props) {
                           row.count = newVal;
                         }}
                       />
-                      <div style={{ width: "fit-content" }}>
-                        /{row.item.count}📦
-                      </div>
+                      <div>/{row.item.count}📦</div>
                       <EmojiButton
                         onClick={() => {
                           deleteItemFromList(row);
@@ -450,7 +447,6 @@ function Take(props) {
                           id={index}
                           type="number"
                           placeholder={row.count}
-                          style={{ width: "fit-content" }}
                           max={row.item.count}
                           onChange={() => {
                             let value = document.getElementById(index).value;
@@ -464,9 +460,7 @@ function Take(props) {
                             row.count = newVal;
                           }}
                         />
-                        <div style={{ width: "fit-content" }}>
-                          /{row.item.count}📦
-                        </div>
+                        <div>/{row.item.count}📦</div>
                         <EmojiButton
                           onClick={() => {
                             deleteItemFromList(row);
