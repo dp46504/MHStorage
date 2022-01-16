@@ -4,6 +4,7 @@ import firebase from "firebase";
 
 // Helpers
 import Priv from "../Helpers/Priv";
+import SearchBox from "../Helpers/SearchBar";
 
 // Components
 import {
@@ -18,22 +19,32 @@ import {
   LoadingLayer,
 } from "../Styles/Styles";
 
-function Give(props) {
+function Take(props) {
   // Classes
   class Item {
-    constructor(qr) {
+    constructor(qr, dataAlreadyDownloaded = false, data = null) {
       this.loading = true;
+      // If there is already data that means the item is in that storage
+      this.available = data === null ? null : true;
 
+      // If data not provided set all to null and then request to databse
       this.qr = qr;
-      this.name = null;
-      this.category = null;
-      this.producer = null;
-      this.magazine = null;
-      this.count = null;
-      this.id = null;
-      this.setMetaData().then((result) => {
+      this.name = data === null ? null : data.nazwa;
+      this.category = data === null ? null : data.kategoria;
+      this.producer = data === null ? null : data.producent;
+      this.magazine = data === null ? null : data.magazyn;
+      this.count = data === null ? null : data.ilosc;
+      this.id = data === null ? null : data.id;
+
+      // If data not provided request data from database. set loading to be over otherwise because data is already assigned
+      if (data === null) {
+        this.setMetaData().then((result) => {
+          this.loading = false;
+        });
+      } else {
         this.loading = false;
-      });
+      }
+
       this.photoURL = null;
       this.getPhotoURL();
     }
@@ -45,18 +56,23 @@ function Give(props) {
         .where("qr", "==", this.qr)
         .where("magazyn", "==", wybranyMagazyn);
       const query = await db.get();
-
-      query.forEach((doc) => {
-        this.available = true;
-        const data = doc.data();
-        this.count = data.ilosc;
-        this.name = data.nazwa;
-        this.category = data.kategoria;
-        this.producer = data.producent;
-        this.magazine = data.magazyn;
-        this.id = doc.id;
-        return true;
-      });
+      if (query.empty) {
+        alert("W tym magazynie nie ma takiego przedmiotu");
+        this.available = false;
+        return false;
+      } else {
+        query.forEach((doc) => {
+          this.available = true;
+          const data = doc.data();
+          this.count = data.ilosc;
+          this.name = data.nazwa;
+          this.category = data.kategoria;
+          this.producer = data.producent;
+          this.magazine = data.magazyn;
+          this.id = doc.id;
+          return true;
+        });
+      }
     };
 
     getPhotoURL = async () => {
@@ -68,7 +84,7 @@ function Give(props) {
           this.photoURL = url;
         })
         .catch((error) => {
-          console.log(`Nie ma zdjecia dla ${this.qr}`);
+          console.log(`Nie ma zdjecia dla ${this.qr}\n`, error);
           this.photoURL = null;
         });
     };
@@ -118,6 +134,8 @@ function Give(props) {
   let [wybranyMagazyn, setWybranyMagazyn] = useState(null);
   let [code, setCode] = useState("");
   let [lista, setLista] = useState([]);
+  let [metoda, setMetoda] = useState(null);
+  let [items, setItems] = useState(null);
   // Confirm Button States
   // 0 - didn't click on confirm
   // 1 - clicked on confirm and need to click again
@@ -128,15 +146,36 @@ function Give(props) {
   const ConfirmButtonText = () => {
     switch (confirm) {
       case 0:
-        return "Oddaj rzeczy z listy";
+        return "Odłóż rzeczy z listy";
       case 1:
-        return "Potwierdź oddanie";
+        return "Potwierdź odłożenie";
       case 2:
         return "Realizowanie...";
       default:
-        return "Oddaj rzeczy z listy";
+        return "Odłóż rzeczy z listy";
     }
   };
+
+  // Download all items from selected storage to help input their names. On 'metoda' set to 'recznie'
+  useEffect(() => {
+    const getItems = async () => {
+      const itemsRef = firebase
+        .firestore()
+        .collection("przedmioty")
+        .where("magazyn", "==", wybranyMagazyn);
+      const items = await itemsRef.get();
+      let itemsArray = [];
+      items.forEach((item) => {
+        itemsArray.push({ ...item.data(), id: item.id });
+      });
+
+      setItems(itemsArray);
+    };
+    // If metoda==='recznie' download items
+    if (metoda === "recznie") {
+      getItems();
+    }
+  }, [metoda]);
 
   // QR Scanner Handlers
   const onScanHandler = (result) => {
@@ -147,25 +186,55 @@ function Give(props) {
   };
 
   // List operations functions
-  const getScannedIntoListHandler = async () => {
+  const getScannedIntoListHandler = async (manual = false) => {
     if (code === "" || code === null || code === undefined) {
     } else {
       LoadingScreenRef.current.style.display = "flex";
       let tab = lista;
-      let item = new Item(code);
-      let row = new Row(item, 0);
-      tab.push(row);
-      setLista(tab);
-      LoadingScreenRef.current.style.display = "none";
+
+      let item = null;
+
+      if (manual) {
+        const comparator = (item) => {
+          return item.nazwa === code;
+        };
+        let found = items.filter(comparator);
+        if (found.length !== 0) {
+          item = new Item(found[0].qr, true, found[0]);
+        } else {
+          return alert("Nie ma przedmiotu o takiej nazwie");
+        }
+      } else {
+        item = new Item(code);
+      }
+
+      const check = setInterval(() => {
+        if (item.loading === true) {
+          console.log("Checking");
+        } else if (item.loading === false) {
+          if (item.available === true) {
+            let row = new Row(item, 0);
+            tab.push(row);
+            setLista(tab);
+          }
+          LoadingScreenRef.current.style.display = "none";
+          clearInterval(check);
+        } else {
+          console.log("Checking");
+        }
+      }, 100);
     }
   };
+
   const deleteItemFromList = (item) => {
     const deleteItem = (itemRef) => {
       return itemRef !== item;
     };
 
     let newlist = lista;
+    console.log(newlist);
     newlist = newlist.filter(deleteItem);
+    console.log(newlist);
     setLista(newlist);
     item = null;
   };
@@ -179,7 +248,6 @@ function Give(props) {
       ref.style.display = "none";
     }
   };
-  // Sending info to backend about given items and log into history
   const sendInfo = async (confirmStatus) => {
     if (confirmStatus === 1) {
       setConfirm(2);
@@ -249,81 +317,176 @@ function Give(props) {
       {/* Main Container with conditional rendering after selecting storage */}
       <Container width="100%" orientation="v">
         {wybranyMagazyn === null ? <h1>Wybierz magazyn</h1> : null}
-        {wybranyMagazyn === null ? (
-          listaMagazynow
-        ) : (
-          <>
-            {/* QR Reader */}
-            <QrReaderStyled
-              onScan={onScanHandler}
-              onError={onErrorHandler}
-              delay={800}
-              facingMode={"environment"}
-              showViewFinder={true}
-            ></QrReaderStyled>
+        {
+          wybranyMagazyn === null ? (
+            listaMagazynow
+          ) : // Select input method
+          metoda === null ? (
+            <>
+              <h1>Wybierz metode</h1>
+              <Button
+                onClick={() => {
+                  setMetoda("recznie");
+                }}
+              >
+                Ręcznie
+              </Button>
+              <Button
+                onClick={() => {
+                  setMetoda("skanowanie");
+                }}
+              >
+                Skanowanie
+              </Button>
+            </>
+          ) : // Render controls according to input method
+          metoda === "skanowanie" ? (
+            <>
+              {/* QR Reader */}
+              <QrReaderStyled
+                onScan={onScanHandler}
+                onError={onErrorHandler}
+                delay={800}
+                facingMode={"environment"}
+                showViewFinder={true}
+              ></QrReaderStyled>
 
-            {/* Box with scanned code */}
-            <ScannedTextBox>{code}</ScannedTextBox>
+              {/* Box with scanned code */}
+              <ScannedTextBox>{code}</ScannedTextBox>
 
-            {/* Button which take scanned code and insert Item into List */}
-            <Button
-              onClick={() => {
-                getScannedIntoListHandler();
-              }}
-            >
-              Odłóż przedmiot
-            </Button>
+              {/* Button which take scanned code and insert Item into List */}
+              <Button
+                onClick={() => {
+                  getScannedIntoListHandler();
+                }}
+              >
+                Weź przedmiot
+              </Button>
 
-            {/* UL with scanned items */}
-            <ScannedTextList>
-              {lista.map((row, index) => {
-                return (
-                  <li key={index}>
-                    <div>{row.item.name}</div>
-                    <Input
-                      id={index}
-                      type="number"
-                      placeholder={row.count}
-                      onChange={() => {
-                        let value = document.getElementById(index).value;
-                        row.count = value;
-                      }}
-                    />
-                    <div> + ({row.item.count})</div>
-                    <EmojiButton
-                      onClick={() => {
-                        deleteItemFromList(row);
-                      }}
-                    >
-                      ❌
-                    </EmojiButton>
-                    <EmojiButton
-                      onClick={() => {
-                        ItemPhotoHandler(row.item.photoURL);
-                      }}
-                    >
-                      📷
-                    </EmojiButton>
-                  </li>
-                );
-              })}
-            </ScannedTextList>
+              {/* UL with scanned items */}
+              <ScannedTextList>
+                {lista.map((row, index) => {
+                  return (
+                    <li key={index}>
+                      <div>{row.item.name}</div>
+                      <Input
+                        id={index}
+                        type="number"
+                        style={{ width: "fit-content" }}
+                        placeholder={row.count}
+                        onChange={() => {
+                          let value = document.getElementById(index).value;
+                          row.count = value;
+                        }}
+                      />
+                      <div style={{ width: "fit-content" }}>
+                        /{row.item.count}📦
+                      </div>
+                      <EmojiButton
+                        onClick={() => {
+                          deleteItemFromList(row);
+                        }}
+                      >
+                        ❌
+                      </EmojiButton>
+                      <EmojiButton
+                        onClick={() => {
+                          ItemPhotoHandler(row.item.photoURL);
+                        }}
+                      >
+                        📷
+                      </EmojiButton>
+                    </li>
+                  );
+                })}
+              </ScannedTextList>
 
-            {/* Confirm Button */}
-            <Button
-              onClick={() => {
-                sendInfo(confirm);
-                setConfirm((confirm + 1) % 3);
-              }}
-              styleState={confirm}
-            >
-              {ConfirmButtonText()}
-            </Button>
-          </>
-        )}
+              {/* Confirm Button */}
+              <Button
+                onClick={() => {
+                  sendInfo(confirm);
+                  setConfirm((confirm + 1) % 3);
+                }}
+                styleState={confirm}
+              >
+                {ConfirmButtonText()}
+              </Button>
+            </>
+          ) : // TODO RECZNE WPROWADZANIE
+          items === null ? (
+            <></>
+          ) : (
+            <>
+              <SearchBox
+                setter={(data) => {
+                  setCode(data);
+                }}
+                data={items}
+              ></SearchBox>
+              {/* Button which take scanned code and insert Item into List */}
+              <Button
+                onClick={() => {
+                  getScannedIntoListHandler(true);
+                }}
+              >
+                Weź przedmiot
+              </Button>
+              {lista.length !== 0 && (
+                <ScannedTextList>
+                  {lista.map((row, index) => {
+                    return (
+                      <li key={index}>
+                        <div>{row.item.name}</div>
+                        <Input
+                          id={index}
+                          type="number"
+                          style={{ width: "fit-content" }}
+                          placeholder={row.count}
+                          onChange={() => {
+                            let value = document.getElementById(index).value;
+                            row.count = value;
+                          }}
+                        />
+                        <div style={{ width: "fit-content" }}>
+                          /{row.item.count}📦
+                        </div>
+                        <EmojiButton
+                          onClick={() => {
+                            deleteItemFromList(row);
+                          }}
+                        >
+                          ❌
+                        </EmojiButton>
+                        <EmojiButton
+                          onClick={() => {
+                            ItemPhotoHandler(row.item.photoURL);
+                          }}
+                        >
+                          📷
+                        </EmojiButton>
+                      </li>
+                    );
+                  })}
+                </ScannedTextList>
+              )}
+              {/* Confirm Button */}
+              <Button
+                onClick={() => {
+                  sendInfo(confirm);
+                  setConfirm((confirm + 1) % 3);
+                }}
+                styleState={confirm}
+              >
+                {ConfirmButtonText()}
+              </Button>
+            </>
+          )
+
+          // TODO KONIEC RECZNEGO WPROWADZANIA
+        }
       </Container>
     </Priv>
   );
 }
 
-export default Give;
+export default Take;

@@ -199,12 +199,8 @@ function Take(props) {
           return item.nazwa === code;
         };
         let found = items.filter(comparator);
-        console.log(`ITEMS:\n`, items);
-        console.log(`FOUND:\n`, found);
-        console.log("CODE: ", code);
         if (found.length !== 0) {
           item = new Item(found[0].qr, true, found[0]);
-          console.log("ITEM:\n", item);
         } else {
           return alert("Nie ma przedmiotu o takiej nazwie");
         }
@@ -377,6 +373,7 @@ function Take(props) {
                       <Input
                         id={index}
                         type="number"
+                        style={{ width: "fit-content" }}
                         placeholder={row.count}
                         max={row.item.count}
                         onChange={() => {
@@ -391,7 +388,9 @@ function Take(props) {
                           row.count = newVal;
                         }}
                       />
-                      <div> / {row.item.count}</div>
+                      <div style={{ width: "fit-content" }}>
+                        /{row.item.count}📦
+                      </div>
                       <EmojiButton
                         onClick={() => {
                           deleteItemFromList(row);
@@ -451,6 +450,7 @@ function Take(props) {
                           id={index}
                           type="number"
                           placeholder={row.count}
+                          style={{ width: "fit-content" }}
                           max={row.item.count}
                           onChange={() => {
                             let value = document.getElementById(index).value;
@@ -464,7 +464,9 @@ function Take(props) {
                             row.count = newVal;
                           }}
                         />
-                        <div> / {row.item.count}</div>
+                        <div style={{ width: "fit-content" }}>
+                          /{row.item.count}📦
+                        </div>
                         <EmojiButton
                           onClick={() => {
                             deleteItemFromList(row);
