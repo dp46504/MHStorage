@@ -17,6 +17,7 @@ import {
   EmojiButton,
   PicturePreview,
   LoadingLayer,
+  Label,
 } from "../Styles/Styles";
 
 function Take(props) {
@@ -136,6 +137,7 @@ function Take(props) {
   let [lista, setLista] = useState([]);
   let [metoda, setMetoda] = useState(null);
   let [items, setItems] = useState(null);
+  let [workplace, setWorkplace] = useState(null);
   // Confirm Button States
   // 0 - didn't click on confirm
   // 1 - clicked on confirm and need to click again
@@ -272,6 +274,7 @@ function Take(props) {
                 ile: +row.count,
                 magazyn: row.item.magazine,
                 kiedy: firebase.firestore.Timestamp.fromDate(new Date()),
+                budowa: workplace === null ? null : workplace,
               })
               .then((result) => {})
               .catch((error) => {
@@ -343,6 +346,14 @@ function Take(props) {
           ) : // Render controls according to input method
           metoda === "skanowanie" ? (
             <>
+              {/* Workplace name input */}
+              <Label for="workplace">Nazwa budowy ⬇️</Label>
+              <Input
+                id="workplace"
+                onChange={(e) => {
+                  setWorkplace(e.target.value);
+                }}
+              ></Input>
               {/* QR Reader */}
               <QrReaderStyled
                 onScan={onScanHandler}
@@ -415,6 +426,14 @@ function Take(props) {
             <></>
           ) : (
             <>
+              {/* Workplace name input */}
+              <Label for="workplace">Nazwa budowy ⬇️</Label>
+              <Input
+                id="workplace"
+                onChange={(e) => {
+                  setWorkplace(e.target.value);
+                }}
+              ></Input>
               <SearchBox
                 setter={(data) => {
                   setCode(data);

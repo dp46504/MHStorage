@@ -203,7 +203,8 @@ export const Input = styled.input`
   font-size: 1.8rem;
   font-weight: bold;
   position: relative;
-  border: 0.18rem dashed ${colors.n1};
+  border: none;
+  border-bottom: 0.2rem solid ${colors.n4};
   transition: transform 500ms;
   margin: 0.3rem;
   &::placeholder {
