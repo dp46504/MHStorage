@@ -245,7 +245,7 @@ export const ScannedTextList = styled.ul`
     grid-template-columns: 5fr 2fr 3fr 1fr 1fr;
     padding: 0.5rem 0.5rem;
     background-color: ${colors.n5};
-    overflow-x: scroll;
+    overflow-x: visible;
   }
   & li:nth-child(n):not(:last-child) {
     border-bottom: 0.1rem solid black;
