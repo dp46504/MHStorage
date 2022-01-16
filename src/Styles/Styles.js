@@ -10,7 +10,12 @@ body{
 *{
     box-sizing: border-box;
     font-family: Helvetica, sans-serif;
-    
+}
+
+@media screen and (max-width:400px){
+  html, body{
+    font-size: 13px;
+  }
 }
 `;
 
@@ -217,9 +222,10 @@ export const ScannedTextList = styled.ul`
     list-style-type: none;
     text-align: center;
     display: grid;
-    grid-template-columns: 5fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 5fr 2fr 3fr 1fr 1fr;
     padding: 0.5rem 0.5rem;
     background-color: ${colors.n5};
+    overflow-x: scroll;
   }
   & li:nth-child(n):not(:last-child) {
     border-bottom: 0.1rem solid black;
@@ -238,7 +244,6 @@ export const ScannedTextList = styled.ul`
 
   & li ${Input} {
     background-color: ${colors.n4};
-    width: 100%;
     border: none;
   }
   & li ${Input}::placeholder {
