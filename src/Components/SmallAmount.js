@@ -58,6 +58,33 @@ function SmallAmount(props) {
     return magazines;
   };
 
+  const generateReport = async () => {
+    // Get items data
+    let items = await getItemsInfo();
+
+    // Get references to all checked checkboxes parents
+    let containers = Array.from(
+      document.querySelectorAll("input[type=checkbox]:checked")
+    ).map((checkbox) => {
+      return checkbox.parentElement;
+    });
+
+    // Somewhere to store info about items
+    let itemsToBuy = [];
+    // Getting info about items to report
+    containers.forEach((element) => {
+      const comparator = (item) => {
+        return item.qr === element.getElementsByTagName("input")[0].name;
+      };
+      const quantity = element.getElementsByTagName("input")[1].value;
+      let itemInfo = items.filter(comparator);
+
+      itemsToBuy.push({ ...itemInfo[0], doKupienia: quantity });
+    });
+
+    // TODO w itemsToBuy sa przedmioty do kupienia. [doKupienia] okresla ilosc danej rzeczy do kupienia
+  };
+
   // Sorting items depending on it's amount and location and making JSX Table
   const makeTable = (items, magazines) => {
     let component = [];
@@ -106,6 +133,8 @@ function SmallAmount(props) {
             <div>mala Ilosc</div>
             <div>🚐</div>
             <div>skąd</div>
+            <div>📝</div>
+            <div>🔢</div>
           </TableColumnTitles>
         );
 
@@ -145,7 +174,7 @@ function SmallAmount(props) {
           }
 
           component.push(
-            <TableRow color="o">
+            <TableRow color="o" id={item.qr}>
               <div>{item.nazwa}</div>
               <div>{item.qr}</div>
               <div>{item.ilosc}</div>
@@ -153,6 +182,13 @@ function SmallAmount(props) {
 
               <div>{borrow.amount}</div>
               <div>{borrow.from}</div>
+              <input
+                type="checkbox"
+                class="checkbox"
+                name={item.qr}
+                value={item.qr}
+              ></input>
+              <input type="number" step="0.01"></input>
             </TableRow>
           );
         });
@@ -193,7 +229,7 @@ function SmallAmount(props) {
           }
 
           component.push(
-            <TableRow color="r">
+            <TableRow color="r" id={item.qr}>
               <div>{item.nazwa}</div>
               <div>{item.qr}</div>
               <div>{item.ilosc}</div>
@@ -201,6 +237,13 @@ function SmallAmount(props) {
 
               <div>{borrow.amount}</div>
               <div>{borrow.from}</div>
+              <input
+                type="checkbox"
+                class="checkbox"
+                name={item.qr}
+                value={item.qr}
+              ></input>
+              <input type="number" step="0.01"></input>
             </TableRow>
           );
         });
@@ -237,7 +280,18 @@ function SmallAmount(props) {
             Sprawdź małe ilości
           </Button>
         )}
-        {buttonClicked && tableJSX}
+        {buttonClicked && (
+          <>
+            {tableJSX}
+            <Button
+              onClick={() => {
+                generateReport();
+              }}
+            >
+              Pobierz liste
+            </Button>
+          </>
+        )}
       </Container>
     </Priv>
   );

@@ -387,9 +387,9 @@ export const TableColumnTitles = styled.div`
   padding-top: 0.3rem;
   padding-bottom: 0.3rem;
   font-weight: bold;
-  align-items: center;
-  grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
-  font-size: 1.2rem;
+  place-items: center;
+  grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr 1fr 0.3fr;
+  font-size: 0.9rem;
 `;
 
 export const TableWrapper = styled.div`
@@ -402,9 +402,10 @@ export const TableRow = styled.div`
   display: grid;
   padding-top: 0.3rem;
   padding-bottom: 0.3rem;
-  font-size: 1.4rem;
+  font-size: 1rem;
 
-  grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 2fr 2fr 1fr 1fr 1fr 1fr 1fr 0.3fr;
+  place-items: center;
   background-color: ${(props) => {
     if (props.color === "o") {
       return colors.orange;
@@ -412,6 +413,15 @@ export const TableRow = styled.div`
       return colors.red;
     }
   }};
+
+  & input[type="number"] {
+    max-width: 2rem;
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      display: none;
+    }
+  }
 `;
 
 export const PopUpWindow = styled.div`
