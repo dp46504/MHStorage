@@ -83,6 +83,23 @@ function SmallAmount(props) {
     });
 
     // TODO w itemsToBuy sa przedmioty do kupienia. [doKupienia] okresla ilosc danej rzeczy do kupienia
+    console.log(itemsToBuy);
+
+    let csvContent = "data:text/csv;charset=utf-8,";
+    csvContent += `Nazwa;Numer katalogowy;Ile do zamowienia\r\n`;
+    itemsToBuy.forEach((item) => {
+      csvContent += `${item.nazwa};${item.qr};${item.doKupienia}\r\n`;
+    });
+    // window.open(encodeURI(csvContent));
+
+    var link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute(
+      "download",
+      `zamowienie_${new Date(Date.now()).toLocaleDateString()}.csv`
+    );
+    document.body.appendChild(link);
+    link.click();
   };
 
   // Sorting items depending on it's amount and location and making JSX Table
