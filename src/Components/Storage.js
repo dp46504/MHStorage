@@ -14,6 +14,7 @@ import { colors } from "../Styles/Styles";
 
 function Storage(props) {
   let [listaMagazynow, setListaMagazynow] = useState(null);
+  let [infoMagazynow, setInfoMagazynow] = useState(null);
   let [wybranyMagazyn, setWybranyMagazyn] = useState(null);
   let [listaPrzedmiotow, setListaPrzedmiotow] = useState(null);
 
@@ -22,6 +23,7 @@ function Storage(props) {
       const db = firebase.firestore().collection("magazyny");
       const query = await db.get();
       let lista = [];
+      let listaInfo = [];
 
       const storageClickHandler = (id) => {
         setWybranyMagazyn(id);
@@ -38,8 +40,10 @@ function Storage(props) {
             {dane.ulica} {dane.blok} {dane.miasto} {dane.kraj}
           </Button>
         );
+        listaInfo.push(dane);
       });
       setListaMagazynow(lista);
+      setInfoMagazynow(listaInfo);
     };
     getStorageNamesData();
   }, []);
@@ -125,6 +129,10 @@ function Storage(props) {
       },
     },
   };
+
+  const magazineInfoComparator = (info) => {
+    return info.id === wybranyMagazyn;
+  };
   return (
     <Priv>
       <Container width="100%" orientation="v">
@@ -132,7 +140,9 @@ function Storage(props) {
         {wybranyMagazyn === null ? listaMagazynow : null}
         {wybranyMagazyn !== null ? (
           <DataTable
-            title={`Przedmioty z magazynu nr ${wybranyMagazyn}`}
+            title={`Przedmioty z magazynu: ${
+              infoMagazynow.filter(magazineInfoComparator)[0].nazwa
+            }`}
             customStyles={customStyles}
             columns={columns}
             responsive={true}
