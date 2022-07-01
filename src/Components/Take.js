@@ -235,9 +235,7 @@ function Take(props) {
     };
 
     let newlist = lista;
-    console.log(newlist);
     newlist = newlist.filter(deleteItem);
-    console.log(newlist);
     setLista(newlist);
     item = null;
   };
@@ -431,7 +429,7 @@ function Take(props) {
                 {ConfirmButtonText()}
               </Button>
             </>
-          ) : // TODO RECZNE WPROWADZANIE
+          ) : 
           items === null ? (
             <></>
           ) : (

@@ -16,6 +16,7 @@ import LogButton from "./Components/LogButton";
 import Give from "./Components/Give";
 import AddItem from "./Components/AddItem";
 import SmallAmount from "./Components/SmallAmount";
+import Construction from './Components/Construction'
 
 function App() {
   useEffect(() => {
@@ -44,7 +45,7 @@ function App() {
             <Link to="/take">Zabierz</Link>
             <Link to="/give">Odłóż</Link>
             <Link to="/storage">Stan</Link>
-            <Link to="/report">Raport</Link>
+            <Link to="/constructions">Budowy</Link>
             <Link to="/additem">+</Link>
             <Link to="/smallamount">Restock</Link>
           </Priv>
@@ -56,6 +57,7 @@ function App() {
           <Route path="/storage" exact component={Storage}></Route>
           <Route path="/take" exact component={Take}></Route>
           <Route path="/give" exact component={Give}></Route>
+          <Route path="/constructions" exact component={Construction}></Route>
           <Route path="/smallamount" exact component={SmallAmount}></Route>
           <Route path="/additem" exact component={AddItem}></Route>
         </Switch>
