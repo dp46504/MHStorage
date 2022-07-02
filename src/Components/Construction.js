@@ -8,10 +8,8 @@ import SearchBox from "../Helpers/SearchBar";
 
 // Components
 import {
-    QrReaderStyled,
     Button,
     Container,
-    ScannedTextBox,
     ScannedTextList,
     Input,
     EmojiButton,
@@ -102,7 +100,10 @@ function Construction(props){
     // 1 - Create construction list
     const [choice, setChoice] = useState(null)
     const [items, setItems] = useState([]);
+    const [workplacesList, setWorkplacesList]=useState([]);
     const [workplace, setWorkplace] = useState("")
+    const [activeWorkplace, setActiveWorkplace] = useState(null)
+    const [activeWorkplaceItems, setActiveWorkplaceItems] = useState(null)
     const [code, setCode] = useState("");
     const [lista, setLista] = useState([]);
 
@@ -186,23 +187,63 @@ function Construction(props){
 
     // Download all items to help input their names. On 'choice' set to 1
   useEffect(() => {
-    const getItems = async () => {
-      const itemsRef = firebase
-        .firestore()
-        .collection("przedmioty");
-      const items = await itemsRef.get();
-      let itemsArray = [];
-      items.forEach((item) => {
-        itemsArray.push({ ...item.data(), id: item.id });
-      });
-
-      setItems(itemsArray);
-    };
     // If choice === 1 download items
     if (choice === 1) {
+      const getItems = async () => {
+        const itemsRef = firebase
+          .firestore()
+          .collection("przedmioty");
+        const items = await itemsRef.get();
+        let itemsArray = [];
+        items.forEach((item) => {
+          itemsArray.push({ ...item.data(), id: item.id });
+        });
+  
+        setItems(itemsArray);
+      };
+
       getItems();
+    }else if(choice === 0 ){ //If choice === 0 download workplaces
+      const getWorkplaces = async () => {
+        const itemsRef = firebase
+          .firestore()
+          .collection("budowy");
+        const workplaces = await itemsRef.get();
+        let workplacesArray = [];
+        workplaces.forEach((workplc) => {
+          workplacesArray.push({ ...workplc.data(), id: workplc.id });
+        });
+  
+        setWorkplacesList(workplacesArray);
+      };
+      
+      getWorkplaces();
     }
   }, [choice]);
+
+// Download items from active workplace
+useEffect(() => {
+  if(activeWorkplace===null)return null
+  const getItems=async()=>{
+    let activeWorkplaceItemsList=[]
+    
+    activeWorkplace.przedmioty.forEach(async(przedmiot)=>{
+      const itemRef = firebase
+          .firestore()
+          .collection("przedmioty").where("qr", "==", przedmiot.qr)
+      const item=await itemRef.get()
+      item.forEach(itemInfo=>{
+        activeWorkplaceItemsList.push({...itemInfo.data(), id:itemInfo.id})
+
+      })
+    })
+
+    setActiveWorkplaceItems(activeWorkplaceItemsList)
+  }
+
+  getItems()
+
+},[activeWorkplace])
 
   const saveList=()=>{
     if(workplace==="")return alert("Dodaj nazwe budowy")
@@ -307,6 +348,35 @@ return <Priv><Container width="100%" orientation="v">
               )}
               <Button onClick={saveList}>Zapisz listę</Button>
     </>}
+
+    {/* If Showing List was the choice */}
+    {choice===0 && workplacesList.length!==0 && activeWorkplace===null &&<>
+      {workplacesList.map((workplc)=>{
+        return <Button onClick={()=>{
+          // Setting chosen workplace as active
+          setActiveWorkplace(workplc)
+        }}>
+          {workplc.budowa} | utw. {new Date(workplc.kiedy.toDate()).toLocaleString()}
+          </Button>
+      })}
+    </>}
+
+      {/* Displaying active workplace */}
+      {activeWorkplace!==null && activeWorkplaceItems!==null && <>
+        <Label>Nazwa budowy: {activeWorkplace.budowa}</Label>
+        <Label>Stworzone przez: {activeWorkplace.kto}</Label>
+        <Label>Stworzone: {new Date(activeWorkplace.kiedy.toDate()).toLocaleString()}</Label>
+
+      {/* Displaying active workplace items */}
+        {
+      activeWorkplaceItems.map((przedmiot)=>{
+          return <h1>{przedmiot.qr}</h1>
+        })}
+      </>}
+
+      
+
+      
 
     </Container>
     </Priv>
