@@ -103,7 +103,7 @@ function Construction(props){
     const [workplacesList, setWorkplacesList]=useState([]);
     const [workplace, setWorkplace] = useState("")
     const [activeWorkplace, setActiveWorkplace] = useState(null)
-    const [activeWorkplaceItems, setActiveWorkplaceItems] = useState(null)
+    const [activeWorkplaceItems, setActiveWorkplaceItems] = useState([])
     const [code, setCode] = useState("");
     const [lista, setLista] = useState([]);
 
@@ -223,7 +223,7 @@ function Construction(props){
 
 // Download items from active workplace
 useEffect(() => {
-  if(activeWorkplace===null)return null
+  if(activeWorkplace===null)return 
   const getItems=async()=>{
     let activeWorkplaceItemsList=[]
     
@@ -233,17 +233,22 @@ useEffect(() => {
           .collection("przedmioty").where("qr", "==", przedmiot.qr)
       const item=await itemRef.get()
       item.forEach(itemInfo=>{
-        activeWorkplaceItemsList.push({...itemInfo.data(), id:itemInfo.id})
+        activeWorkplaceItemsList.push({...itemInfo.data(), id:itemInfo.id, toGet:przedmiot.count})
 
       })
     })
 
+
+    // Applying items to the list in the UI
     setActiveWorkplaceItems(activeWorkplaceItemsList)
   }
 
   getItems()
 
 },[activeWorkplace])
+
+// TODO Send info about construction list
+const sendInfo=async()=>{}
 
   const saveList=()=>{
     if(workplace==="")return alert("Dodaj nazwe budowy")
@@ -362,16 +367,71 @@ return <Priv><Container width="100%" orientation="v">
     </>}
 
       {/* Displaying active workplace */}
-      {activeWorkplace!==null && activeWorkplaceItems!==null && <>
+      {activeWorkplace!==null &&  <>
         <Label>Nazwa budowy: {activeWorkplace.budowa}</Label>
         <Label>Stworzone przez: {activeWorkplace.kto}</Label>
         <Label>Stworzone: {new Date(activeWorkplace.kiedy.toDate()).toLocaleString()}</Label>
 
       {/* Displaying active workplace items */}
-        {
-      activeWorkplaceItems.map((przedmiot)=>{
-          return <h1>{przedmiot.qr}</h1>
-        })}
+        {/* UL with scanned items */}
+        <ScannedTextList>
+                {activeWorkplaceItems.map((item, index) => {
+                  return (
+                    <li key={index}>
+                      <div>{item.nazwa}</div>
+                      <div>{item.toGet} 📦</div>
+                      {/* Checkbox */}
+                      <EmojiButton
+                        onClick={(e) => {
+                          const currEmoji=e.target.innerText;
+                          // If item is not checked
+                          if(!activeWorkplaceItems[activeWorkplaceItems.indexOf(item)].checked){
+                            // Changing that item property "checked" to true
+                            setActiveWorkplaceItems(prev=>{
+                              const id=activeWorkplaceItems.indexOf(item)
+                              let newState=[...prev]
+                              newState[id].checked=true
+                              return newState
+                            })
+                            
+                            // If item is checked
+                          }else if(activeWorkplaceItems[activeWorkplaceItems.indexOf(item)].checked){
+                            // Changing that item property "checked" to false
+                            setActiveWorkplaceItems(prev=>{
+                              const id=activeWorkplaceItems.indexOf(item)
+                              let newState=[...prev]
+                              newState[id].checked=false
+                              return newState
+                            })
+                          }
+                        }}
+                      >
+                        {activeWorkplaceItems[activeWorkplaceItems.indexOf(item)].checked?"☑️":"☐"}
+                      </EmojiButton>
+
+                      <EmojiButton
+                        onClick={async() => {
+                          ItemPhotoHandler(await firebase.storage().ref()
+                            .child(`${item.qr}`)
+                            .getDownloadURL()
+                            .then((url) => {
+                              return url;
+                            }));
+                        }}
+                      >
+                        📷
+                      </EmojiButton>
+                    </li>
+                  );
+                })}
+              </ScannedTextList>
+
+        {/* Confirm Button */}
+        <Button
+                onClick={sendInfo}
+              >
+
+              </Button>
       </>}
 
       
