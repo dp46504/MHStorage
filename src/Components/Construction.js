@@ -17,6 +17,7 @@ import {
     LoadingLayer,
     Label,
   } from "../Styles/Styles";
+import PopUpModal from './PopUpModal'
 
 function Construction(props){
  // Classes
@@ -106,6 +107,7 @@ function Construction(props){
     const [activeWorkplaceItems, setActiveWorkplaceItems] = useState([])
     const [code, setCode] = useState("");
     const [lista, setLista] = useState([]);
+    const [popUpOpened, setPopUpOpened] = useState(false);
 
 
     let LoadingScreenRef = useRef(null);
@@ -248,7 +250,9 @@ useEffect(() => {
 },[activeWorkplace])
 
 // TODO Send info about construction list
-const sendInfo=async()=>{}
+const sendInfo=async()=>{
+  setPopUpOpened(true)
+}
 
   const saveList=()=>{
     if(workplace==="")return alert("Dodaj nazwe budowy")
@@ -371,6 +375,8 @@ return <Priv><Container width="100%" orientation="v">
         <Label>Nazwa budowy: {activeWorkplace.budowa}</Label>
         <Label>Stworzone przez: {activeWorkplace.kto}</Label>
         <Label>Stworzone: {new Date(activeWorkplace.kiedy.toDate()).toLocaleString()}</Label>
+        <Label>Ilość pozycji: {activeWorkplace.przedmioty.length}</Label>
+        <Label>Ilość odhaczonych pozycji: {activeWorkplaceItems.filter(item=>{return item.checked}).length}</Label>
 
       {/* Displaying active workplace items */}
         {/* UL with scanned items */}
@@ -427,12 +433,13 @@ return <Priv><Container width="100%" orientation="v">
               </ScannedTextList>
 
         {/* Confirm Button */}
-        <Button
-                onClick={sendInfo}
-              >
-
+        <Button style={{width:"fit-content"}}
+                onClick={sendInfo}>
+                Odśwież
               </Button>
       </>}
+
+      {/* {popUpOpened && <PopUpModal setter={setPopUpOpened}>Message</PopUpModal>} */}
 
       
 

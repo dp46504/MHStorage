@@ -17,6 +17,25 @@ body{
     font-size: 13px;
   }
 }
+
+#modal{
+  & div{
+    position: fixed;
+    width:100%;
+    height:100%;
+    display: grid;
+    place-items: center;
+    top:0;
+    left:0;
+    background-color:#454545aa;
+
+    & h3{
+      color:white;
+      padding:2rem;
+      background-color: #565656aa;
+    }
+  }
+}
 `;
 
 export const colors = {
