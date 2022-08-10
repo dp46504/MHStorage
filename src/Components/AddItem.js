@@ -1,140 +1,141 @@
 // Frameworks imports
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useState } from "react";
 import firebase from "firebase";
 import convert from "image-file-resize";
-
-// Components
-import { Container, Input, Form, Button, Label } from "../Styles/Styles";
+import Button from '@mui/material/Button';
 
 // Helpers
 import Priv from "../Helpers/Priv";
+import { FormControl, InputLabel, MenuItem, Select } from "@material-ui/core";
+import { Stack } from "@mui/system";
+import { TextField } from "@mui/material";
 
 function AddItem(props) {
-  const { register, handleSubmit } = useForm();
-  let [listaMagazynow, setListaMagazynow] = useState(null);
-  let [photo, setPhoto] = useState(null);
+  const [photo, setPhoto] = useState(null);
+  
   const [photoURL, setPhotoURL] = useState("#");
+  const [unit, setUnit] = useState("sztuka")
+  const [name, setName] = useState("")
+  const [category, setCategory] = useState("kanalizacja")
+  const [provider, setProvider] = useState("")
+  const [smallAmount, setSmallAmount] = useState(5)
+  const [packageSize, setPackageSize] = useState(1)
+  const [qr, setQr] = useState("")
 
   // Width, Height
   let thumbnailSize = [280, 500];
 
-  useEffect(() => {
-    let storageLista = [];
-
-    const getMagazineData = async () => {
-      const db = firebase.firestore().collection("magazyny");
-      const query = await db.get();
-      query.forEach((doc) => {
-        const data = doc.data();
-        storageLista.push(data);
-      });
-    };
-    getMagazineData().then((res) => {
-      setListaMagazynow(storageLista);
-    });
-  }, []);
-
-  const onSubmit = async (data) => {
-    console.log(data);
-    var storageRef = firebase.storage().ref().child(`${data.qr}`);
-    storageRef.put(photo).then(() => {
-      alert("Uploaded photo");
-    });
+  const handleSubmit = async () => {
+    var storageRef = firebase.storage().ref().child(`${qr}`);
+    storageRef.put(photo)
     var db = firebase.firestore();
 
-    let item = {
-      kategoria: data.category,
-      magazyn: null,
-      ilosc: null,
-      malaIlosc: parseInt(data.smallQuantity),
-      nazwa: data.name,
-      producent: data.producer,
-      qr: data.qr,
-      cena: parseFloat(data.price),
-    };
+    const item = {
+      id: qr,
+      name,
+      category,
+      provider,
+      smallAmount,
+      packageSize,
+      unit,
+    }
 
-    data.mag.forEach((quantity, index) => {
-      if (quantity !== "") {
-        item.magazyn = parseInt(index);
-        item.ilosc = parseInt(quantity);
-        db.collection("przedmioty").add(item);
-      }
-    });
+    db.collection("przedmioty").add(item).then(r=>alert("Dodano przedmiot do bazy danych"))
   };
 
   return (
     <Priv>
-      <Container width="90%" orientation="v">
-        <Form onSubmit={handleSubmit(onSubmit)}>
-          <Label for="name">Nazwa ⬇️</Label>
-          <Input
-            placeholder="Nazwa"
-            id="name"
-            name="name"
-            {...register("name")}
-          ></Input>
+        <Stack gap={3} sx={{width:"60%", margin:"0 auto"}}>
+        
+        {/* Name */}
+        <TextField 
+        fullwidth
+        id="name" 
+        label="Nazwa" 
+        variant="standard"
+        value={name}
+        onChange={(e)=>{setName(e.target.value)}}
+        />
 
-          <Label for="category">Kategoria ⬇️</Label>
-          <Input
-            placeholder="Kategoria"
-            id="category"
-            name="category"
-            {...register("category")}
-          ></Input>
+        {/* Category */}
+        <FormControl>
+          <InputLabel id="category-select-label">Kategoria</InputLabel>
+          <Select
+            labelId="category-select-label"
+            id="category-select"
+            value={category}
+            label="Kategoria"
+            onChange={(e)=>{setCategory(e.target.value);}}
+          >
+            <MenuItem value={"kanalizacja"}>Kanalizacja</MenuItem>
+            <MenuItem value={"wyslij"}>wyslij mi na whatsappie wiecej kategorii</MenuItem>
+          </Select>
+        </FormControl>
 
-          <Label for="producer">Producent ⬇️</Label>
-          <Input
-            placeholder="Producent"
-            id="producer"
-            name="producer"
-            {...register("producer")}
-          ></Input>
+          {/* Provider */}
+          <TextField 
+          fullwidth
+          id="provider" 
+          label="Dostawca" 
+          variant="standard"
+          value={provider}
+          onChange={(e)=>{setProvider(e.target.value)}}
+          />
 
-          <Label for="small">Mała ilość ⬇️</Label>
-          <Input
-            id="small"
-            placeholder="Mała Ilość"
-            {...register("smallQuantity")}
-          ></Input>
+          {/* Small amount */}
+          <TextField 
+          fullwidth
+          id="smallAmount" 
+          label="Mała ilość" 
+          variant="standard"
+          type="number"
+          value={smallAmount}
+          onChange={(e)=>{setSmallAmount(e.target.value)}}
+          />
 
-          <Label for="qr">QR ⬇️</Label>
-          <Input
-            placeholder="Numer kat."
-            id="qr"
-            name="qr"
-            {...register("qr")}
-          ></Input>
+          {/* Package size */}
+          <TextField 
+          fullwidth
+          id="packageSize" 
+          label="Ile w opakowaniu" 
+          variant="standard"
+          type="number"
+          value={packageSize}
+          onChange={(e)=>{setPackageSize(e.target.value)}}
+          />
 
-          {listaMagazynow !== null &&
-            listaMagazynow.map((magazine) => {
-              return (
-                <>
-                  <Label for={magazine.id}>
-                    Ilosc w magazynie: {magazine.ulica} {magazine.blok} ⬇️
-                  </Label>
-                  <Input
-                    {...register(`mag.${magazine.id}`)}
-                    id={magazine.id}
-                    key={magazine.id}
-                    placeholder={`Magazyn ${magazine.ulica} ${magazine.blok} ilość`}
-                  ></Input>
-                </>
-              );
-            })}
+        <FormControl>
+          <InputLabel id="unit-select-label">Jednostka miary</InputLabel>
+          <Select
+            labelId="unit-select-label"
+            id="unit-select"
+            value={unit}
+            label="Jednostka"
+            onChange={(e)=>{setUnit(e.target.value);}}
+          >
+            <MenuItem value={"sztuka"}>Sztuka</MenuItem>
+            <MenuItem value={"opakowanie"}>Opakowanie</MenuItem>
+            <MenuItem value={"metr"}>Metr</MenuItem>
+            <MenuItem value={"paleta"}>Paleta</MenuItem>
+            <MenuItem value={"worek"}>Worek</MenuItem>
+            <MenuItem value={"litr"}>Litr</MenuItem>
+          </Select>
+        </FormControl>
 
-          <Label for="price">Cena ⬇️</Label>
-          <Input
-            {...register("price")}
-            id="price"
-            type="number"
-            placeholder="Cena"
-            step="0.01"
-          ></Input>
-          <img src={photoURL} alt="item"></img>
 
-          <Input
-            {...register("photo", { required: "Musisz dodać zdjęcie" })}
+          {/* QR */}
+          <TextField 
+          fullwidth
+          id="qr" 
+          label="qr | numer katalogowy (unikalny)" 
+          variant="standard"
+          value={qr}
+          onChange={(e)=>{setQr(e.target.value)}}
+          />
+
+          {photoURL !== "#" && <img src={photoURL} alt="item"></img>}
+
+          <input
             type="file"
             id="photo"
             name="photo"
@@ -160,9 +161,12 @@ function AddItem(props) {
             }}
           />
 
-          <Button type="submit">Dodaj</Button>
-        </Form>
-      </Container>
+            <Button 
+            variant="outlined" 
+            sx={{padding:"2rem"}}
+            onClick={handleSubmit}
+            >Dodaj</Button>
+          </Stack>
     </Priv>
   );
 }

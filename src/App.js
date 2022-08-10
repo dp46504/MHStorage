@@ -17,6 +17,7 @@ import Give from "./Components/Give";
 import AddItem from "./Components/AddItem";
 import SmallAmount from "./Components/SmallAmount";
 import Construction from './Components/Construction'
+import ListOfItemsInDb from "./Components/ListOfItemsInDb";
 
 function App() {
   useEffect(() => {
@@ -45,6 +46,7 @@ function App() {
             <Link to="/take">Zabierz</Link>
             <Link to="/give">Odłóż</Link>
             <Link to="/storage">Stan</Link>
+            <Link to="/itemsindb">Przemioty w bazie danych</Link>
             <Link to="/constructions">Budowy</Link>
             <Link to="/additem">+</Link>
             <Link to="/smallamount">Restock</Link>
@@ -60,6 +62,7 @@ function App() {
           <Route path="/constructions" exact component={Construction}></Route>
           <Route path="/smallamount" exact component={SmallAmount}></Route>
           <Route path="/additem" exact component={AddItem}></Route>
+          <Route path="/itemsindb" exact component={ListOfItemsInDb}></Route>
         </Switch>
         {/* End of Routes */}
       </Router>
