@@ -68,7 +68,9 @@ function AddItem(props) {
             onChange={(e)=>{setCategory(e.target.value);}}
           >
             <MenuItem value={"kanalizacja"}>Kanalizacja</MenuItem>
+            <MenuItem value={"REHAU"}>REHAU</MenuItem>
             <MenuItem value={"wyslij"}>wyslij mi na whatsappie wiecej kategorii</MenuItem>
+          
           </Select>
         </FormControl>
 
